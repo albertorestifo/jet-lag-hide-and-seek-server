@@ -20,10 +20,15 @@ defmodule JetLagServerWeb.Router do
     get "/", PageController, :home
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", JetLagServerWeb do
-  #   pipe_through :api
-  # end
+  # API routes for the Hide & Seek game
+  scope "/api", JetLagServerWeb.API, as: :api do
+    pipe_through :api
+
+    post "/games", GameController, :create
+    get "/games/:id", GameController, :show
+    post "/games/:id/start", GameController, :start
+    post "/games/join", GameController, :join
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:jet_lag_server, :dev_routes) do

@@ -1,5 +1,5 @@
 defmodule JetLagServerWeb.ErrorJSONTest do
-  use JetLagServerWeb.ConnCase, async: true
+  use JetLagServerWeb.ConnCase
 
   test "renders 404" do
     assert JetLagServerWeb.ErrorJSON.render("404.json", %{}) == %{errors: %{detail: "Not Found"}}
