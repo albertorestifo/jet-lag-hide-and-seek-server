@@ -48,7 +48,7 @@ Sent when a new player joins the game.
     "player": {
       "id": "player-456",
       "name": "Jane Smith",
-      "isCreator": false
+      "is_creator": false
     }
   }
 }
@@ -62,7 +62,7 @@ Sent when a player leaves the game.
 {
   "type": "player_left",
   "data": {
-    "playerId": "player-456"
+    "player_id": "player-456"
   }
 }
 ```
@@ -75,7 +75,7 @@ Sent when the game is started by the creator.
 {
   "type": "game_started",
   "data": {
-    "startedAt": "2023-06-15T15:00:00Z"
+    "started_at": "2023-06-15T15:00:00Z"
   }
 }
 ```

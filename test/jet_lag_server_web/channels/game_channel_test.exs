@@ -26,13 +26,13 @@ defmodule JetLagServerWeb.GameChannelTest do
 
   test "ping replies with pong", %{socket: socket} do
     ref = push(socket, "ping", %{})
-    assert_reply ref, :ok, %{type: "pong", data: %{}}
+    assert_reply ref, :ok, %JetLagServer.Games.Structs.PongEvent{}
   end
 
   test "join_game adds a player to the game", %{socket: socket, game: game} do
     # Push a join_game message
     ref = push(socket, "join_game", %{"playerName" => "Jane Smith"})
-    assert_reply ref, :ok, %{playerId: player_id}
+    assert_reply ref, :ok, %{player_id: player_id}
 
     # Verify the player was added to the game
     assert player_id =~ ~r/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
@@ -42,15 +42,19 @@ defmodule JetLagServerWeb.GameChannelTest do
     assert player.is_creator == false
 
     # Verify a player_joined broadcast was sent
-    assert_broadcast "player_joined", %{
-      player: %{id: ^player_id, name: "Jane Smith", isCreator: false}
+    assert_broadcast "player_joined", %JetLagServer.Games.Structs.PlayerJoinedEvent{
+      player: %JetLagServer.Games.Structs.Player{
+        id: ^player_id,
+        name: "Jane Smith",
+        is_creator: false
+      }
     }
   end
 
   test "start_game starts the game when the creator initiates it", %{socket: socket, game: game} do
     # Push a start_game message
     ref = push(socket, "start_game", %{})
-    assert_reply ref, :ok, %{startedAt: started_at}
+    assert_reply ref, :ok, %{started_at: started_at}
 
     # Verify the game was started
     updated_game = Games.get_game(game.id)
@@ -58,7 +62,9 @@ defmodule JetLagServerWeb.GameChannelTest do
     assert updated_game.started_at != nil
 
     # Verify a game_started broadcast was sent
-    assert_broadcast "game_started", %{startedAt: ^started_at}
+    assert_broadcast "game_started", %JetLagServer.Games.Structs.GameStartedEvent{
+      started_at: ^started_at
+    }
   end
 
   test "start_game returns error when non-creator tries to start the game", %{game: game} do
@@ -104,7 +110,10 @@ defmodule JetLagServerWeb.GameChannelTest do
     assert Games.get_player(player.id) == nil
 
     # Verify a player_left broadcast was sent
-    assert_broadcast "player_left", %{playerId: player_id}
+    assert_broadcast "player_left", %JetLagServer.Games.Structs.PlayerLeftEvent{
+      player_id: player_id
+    }
+
     assert player_id == player.id
   end
 

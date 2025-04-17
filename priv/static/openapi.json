@@ -21,9 +21,7 @@
         "summary": "Create a new game",
         "description": "Creates a new game with the specified settings",
         "operationId": "createGame",
-        "tags": [
-          "games"
-        ],
+        "tags": ["games"],
         "requestBody": {
           "required": true,
           "content": {
@@ -73,9 +71,7 @@
         "summary": "Get game details",
         "description": "Retrieves details about a specific game",
         "operationId": "getGame",
-        "tags": [
-          "games"
-        ],
+        "tags": ["games"],
         "parameters": [
           {
             "name": "gameId",
@@ -125,9 +121,7 @@
         "summary": "Start a game",
         "description": "Starts a game, preventing new players from joining",
         "operationId": "startGame",
-        "tags": [
-          "games"
-        ],
+        "tags": ["games"],
         "parameters": [
           {
             "name": "gameId",
@@ -177,9 +171,7 @@
         "summary": "Join a game",
         "description": "Allows a player to join an existing game using a game code",
         "operationId": "joinGame",
-        "tags": [
-          "games"
-        ],
+        "tags": ["games"],
         "requestBody": {
           "required": true,
           "content": {
@@ -239,10 +231,7 @@
     "schemas": {
       "Location": {
         "type": "object",
-        "required": [
-          "name",
-          "coordinates"
-        ],
+        "required": ["name", "coordinates"],
         "properties": {
           "name": {
             "type": "string",
@@ -262,12 +251,9 @@
             },
             "minItems": 2,
             "maxItems": 2,
-            "example": [
-              -3.7038,
-              40.4168
-            ]
+            "example": [-3.7038, 40.4168]
           },
-          "boundingBox": {
+          "bounding_box": {
             "type": "array",
             "description": "Bounding box coordinates [minLon, minLat, maxLon, maxLat]",
             "items": {
@@ -275,19 +261,14 @@
             },
             "minItems": 4,
             "maxItems": 4,
-            "example": [
-              -3.8,
-              40.3,
-              -3.6,
-              40.5
-            ]
+            "example": [-3.8, 40.3, -3.6, 40.5]
           },
-          "osmId": {
+          "osm_id": {
             "type": "string",
             "description": "OpenStreetMap ID",
             "example": "12345678"
           },
-          "osmType": {
+          "osm_type": {
             "type": "string",
             "description": "OpenStreetMap element type",
             "example": "way"
@@ -298,23 +279,20 @@
         "type": "object",
         "required": [
           "units",
-          "hidingZones",
-          "hidingZoneSize",
-          "gameDuration",
-          "dayStartTime",
-          "dayEndTime"
+          "hiding_zones",
+          "hiding_zone_size",
+          "game_duration",
+          "day_start_time",
+          "day_end_time"
         ],
         "properties": {
           "units": {
             "type": "string",
-            "enum": [
-              "ansi",
-              "iso"
-            ],
+            "enum": ["ansi", "iso"],
             "description": "Unit system to use",
             "example": "iso"
           },
-          "hidingZones": {
+          "hiding_zones": {
             "type": "array",
             "description": "Types of locations where players can hide",
             "items": {
@@ -328,31 +306,28 @@
                 "tram"
               ]
             },
-            "example": [
-              "bus_stops",
-              "local_trains"
-            ]
+            "example": ["bus_stops", "local_trains"]
           },
-          "hidingZoneSize": {
+          "hiding_zone_size": {
             "type": "integer",
             "description": "Size of hiding zones in meters",
             "minimum": 100,
             "maximum": 2000,
             "example": 500
           },
-          "gameDuration": {
+          "game_duration": {
             "type": "integer",
             "description": "Duration of the game in days",
             "minimum": 1,
             "example": 1
           },
-          "dayStartTime": {
+          "day_start_time": {
             "type": "string",
             "description": "Daily start time in HH:MM format",
             "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$",
             "example": "09:00"
           },
-          "dayEndTime": {
+          "day_end_time": {
             "type": "string",
             "description": "Daily end time in HH:MM format",
             "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$",
@@ -362,10 +337,7 @@
       },
       "Player": {
         "type": "object",
-        "required": [
-          "id",
-          "name"
-        ],
+        "required": ["id", "name"],
         "properties": {
           "id": {
             "type": "string",
@@ -377,7 +349,7 @@
             "description": "Player's name",
             "example": "John Doe"
           },
-          "isCreator": {
+          "is_creator": {
             "type": "boolean",
             "description": "Whether this player created the game",
             "default": false,
@@ -387,14 +359,7 @@
       },
       "Game": {
         "type": "object",
-        "required": [
-          "id",
-          "code",
-          "location",
-          "settings",
-          "players",
-          "status"
-        ],
+        "required": ["id", "code", "location", "settings", "players", "status"],
         "properties": {
           "id": {
             "type": "string",
@@ -422,21 +387,17 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "waiting",
-              "active",
-              "completed"
-            ],
+            "enum": ["waiting", "active", "completed"],
             "description": "Current status of the game",
             "example": "waiting"
           },
-          "createdAt": {
+          "created_at": {
             "type": "string",
             "format": "date-time",
             "description": "When the game was created",
             "example": "2023-06-15T14:30:00Z"
           },
-          "startedAt": {
+          "started_at": {
             "type": "string",
             "format": "date-time",
             "description": "When the game was started",
@@ -447,11 +408,7 @@
       },
       "CreateGameRequest": {
         "type": "object",
-        "required": [
-          "location",
-          "settings",
-          "creator"
-        ],
+        "required": ["location", "settings", "creator"],
         "properties": {
           "location": {
             "$ref": "#/components/schemas/Location"
@@ -461,9 +418,7 @@
           },
           "creator": {
             "type": "object",
-            "required": [
-              "name"
-            ],
+            "required": ["name"],
             "properties": {
               "name": {
                 "type": "string",
@@ -476,23 +431,19 @@
       },
       "CreateGameResponse": {
         "type": "object",
-        "required": [
-          "gameId",
-          "gameCode",
-          "websocketUrl"
-        ],
+        "required": ["game_id", "game_code", "websocket_url"],
         "properties": {
-          "gameId": {
+          "game_id": {
             "type": "string",
             "description": "Unique identifier for the created game",
             "example": "game-123"
           },
-          "gameCode": {
+          "game_code": {
             "type": "string",
             "description": "Short code for joining the game",
             "example": "ABC123"
           },
-          "websocketUrl": {
+          "websocket_url": {
             "type": "string",
             "description": "WebSocket URL for real-time updates",
             "example": "wss://api.jetlag.example.com/ws/games/game-123"
@@ -501,17 +452,14 @@
       },
       "JoinGameRequest": {
         "type": "object",
-        "required": [
-          "gameCode",
-          "playerName"
-        ],
+        "required": ["game_code", "player_name"],
         "properties": {
-          "gameCode": {
+          "game_code": {
             "type": "string",
             "description": "Code for the game to join",
             "example": "ABC123"
           },
-          "playerName": {
+          "player_name": {
             "type": "string",
             "description": "Name of the player joining",
             "example": "Jane Smith"
@@ -520,24 +468,19 @@
       },
       "JoinGameResponse": {
         "type": "object",
-        "required": [
-          "gameId",
-          "playerId",
-          "websocketUrl",
-          "game"
-        ],
+        "required": ["game_id", "player_id", "websocket_url", "game"],
         "properties": {
-          "gameId": {
+          "game_id": {
             "type": "string",
             "description": "ID of the joined game",
             "example": "game-123"
           },
-          "playerId": {
+          "player_id": {
             "type": "string",
             "description": "ID assigned to the player",
             "example": "player-456"
           },
-          "websocketUrl": {
+          "websocket_url": {
             "type": "string",
             "description": "WebSocket URL for real-time updates",
             "example": "wss://api.jetlag.example.com/ws/games/game-123"
@@ -549,10 +492,7 @@
       },
       "Error": {
         "type": "object",
-        "required": [
-          "code",
-          "message"
-        ],
+        "required": ["code", "message"],
         "properties": {
           "code": {
             "type": "string",

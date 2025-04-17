@@ -33,7 +33,7 @@ defmodule JetLagServerWeb.API.GameControllerTest do
 
       conn = post(conn, ~p"/api/games", valid_attrs)
 
-      assert %{"gameId" => game_id, "gameCode" => game_code, "websocketUrl" => websocket_url} =
+      assert %{"game_id" => game_id, "game_code" => game_code, "websocket_url" => websocket_url} =
                json_response(conn, 201)
 
       assert game_id =~ ~r/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
@@ -80,7 +80,7 @@ defmodule JetLagServerWeb.API.GameControllerTest do
       assert data["settings"]["units"] == "iso"
       assert [player] = data["players"]
       assert player["name"] == "John Doe"
-      assert player["isCreator"] == true
+      assert player["is_creator"] == true
     end
 
     test "renders 404 when game does not exist", %{conn: conn} do
@@ -97,7 +97,7 @@ defmodule JetLagServerWeb.API.GameControllerTest do
       assert %{"data" => data} = json_response(conn, 200)
       assert data["id"] == game.id
       assert data["status"] == "active"
-      assert data["startedAt"] != nil
+      assert data["started_at"] != nil
     end
 
     test "renders 404 when game does not exist", %{conn: conn} do
@@ -110,12 +110,12 @@ defmodule JetLagServerWeb.API.GameControllerTest do
     setup [:create_game]
 
     test "renders game when game exists and join is successful", %{conn: conn, game: game} do
-      conn = post(conn, ~p"/api/games/join", %{gameCode: game.code, playerName: "Jane Smith"})
+      conn = post(conn, ~p"/api/games/join", %{game_code: game.code, player_name: "Jane Smith"})
 
       assert %{
-               "gameId" => game_id,
-               "playerId" => player_id,
-               "websocketUrl" => websocket_url,
+               "game_id" => game_id,
+               "player_id" => player_id,
+               "websocket_url" => websocket_url,
                "game" => game_data
              } = json_response(conn, 200)
 
@@ -129,7 +129,7 @@ defmodule JetLagServerWeb.API.GameControllerTest do
     end
 
     test "renders 404 when game does not exist", %{conn: conn} do
-      conn = post(conn, ~p"/api/games/join", %{gameCode: "INVALID", playerName: "Jane Smith"})
+      conn = post(conn, ~p"/api/games/join", %{game_code: "INVALID", player_name: "Jane Smith"})
       assert json_response(conn, 404)["errors"]["detail"] == "Not Found"
     end
   end

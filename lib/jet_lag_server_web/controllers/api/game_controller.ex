@@ -50,20 +50,22 @@ defmodule JetLagServerWeb.API.GameController do
     end
   end
 
-  def join(conn, %{"gameCode" => game_code, "playerName" => player_name}) do
+  def join(conn, %{"game_code" => game_code, "player_name" => player_name}) do
     with %Game{} = game <- Games.get_game_by_code(game_code),
          {:ok, player} <- Games.add_player_to_game(game.id, player_name) do
       # Generate a token for WebSocket authentication
       token = Games.generate_token(game.id, player.id)
 
       # Broadcast to all connected clients that a new player has joined
-      JetLagServerWeb.Endpoint.broadcast("games:#{game.id}", "player_joined", %{
-        player: %{
-          id: player.id,
-          name: player.name,
-          isCreator: player.is_creator
+      player_struct = JetLagServer.Games.Structs.Player.from_schema(player)
+
+      JetLagServerWeb.Endpoint.broadcast(
+        "games:#{game.id}",
+        "player_joined",
+        %JetLagServer.Games.Structs.PlayerJoinedEvent{
+          player: player_struct
         }
-      })
+      )
 
       # Get the updated game with the new player
       game = Games.get_game(game.id)

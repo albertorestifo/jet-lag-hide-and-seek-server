@@ -46,9 +46,9 @@ Creates a new hide and seek game with the specified settings.
 
 ```json
 {
-  "gameId": "game-123",
-  "gameCode": "ABC123",
-  "websocketUrl": "wss://api.jetlag.example.com/ws/games/game-123?token=xyz"
+  "game_id": "game-123",
+  "game_code": "ABC123",
+  "websocket_url": "wss://api.jetlag.example.com/ws/games/game-123?token=xyz"
 }
 ```
 
@@ -69,28 +69,28 @@ Retrieves details about a specific game.
       "name": "Madrid",
       "type": "City",
       "coordinates": [-3.7038, 40.4168],
-      "boundingBox": [-3.8, 40.3, -3.6, 40.5],
-      "osmId": "12345678",
-      "osmType": "way"
+      "bounding_box": [-3.8, 40.3, -3.6, 40.5],
+      "osm_id": "12345678",
+      "osm_type": "way"
     },
     "settings": {
       "units": "iso",
-      "hidingZones": ["bus_stops", "local_trains"],
-      "hidingZoneSize": 500,
-      "gameDuration": 1,
-      "dayStartTime": "09:00",
-      "dayEndTime": "18:00"
+      "hiding_zones": ["bus_stops", "local_trains"],
+      "hiding_zone_size": 500,
+      "game_duration": 1,
+      "day_start_time": "09:00",
+      "day_end_time": "18:00"
     },
     "players": [
       {
         "id": "player-123",
         "name": "John Doe",
-        "isCreator": true
+        "is_creator": true
       }
     ],
     "status": "waiting",
-    "createdAt": "2023-06-15T14:30:00Z",
-    "startedAt": null
+    "created_at": "2023-06-15T14:30:00Z",
+    "started_at": null
   }
 }
 ```
@@ -128,12 +128,12 @@ Starts a game, preventing new players from joining.
       {
         "id": "player-123",
         "name": "John Doe",
-        "isCreator": true
+        "is_creator": true
       }
     ],
     "status": "active",
-    "createdAt": "2023-06-15T14:30:00Z",
-    "startedAt": "2023-06-15T15:00:00Z"
+    "created_at": "2023-06-15T14:30:00Z",
+    "started_at": "2023-06-15T15:00:00Z"
   }
 }
 ```
@@ -148,8 +148,8 @@ Allows a player to join an existing game using a game code.
 
 ```json
 {
-  "gameCode": "ABC123",
-  "playerName": "Jane Smith"
+  "game_code": "ABC123",
+  "player_name": "Jane Smith"
 }
 ```
 
@@ -157,9 +157,9 @@ Allows a player to join an existing game using a game code.
 
 ```json
 {
-  "gameId": "game-123",
-  "playerId": "player-456",
-  "websocketUrl": "wss://api.jetlag.example.com/ws/games/game-123?token=xyz",
+  "game_id": "game-123",
+  "player_id": "player-456",
+  "websocket_url": "wss://api.jetlag.example.com/ws/games/game-123?token=xyz",
   "game": {
     "id": "game-123",
     "code": "ABC123",
