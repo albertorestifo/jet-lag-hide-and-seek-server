@@ -110,7 +110,8 @@ defmodule JetLagServerWeb.API.GameControllerTest do
     setup [:create_game]
 
     test "renders game when game exists and join is successful", %{conn: conn, game: game} do
-      conn = post(conn, ~p"/api/games/join", %{game_code: game.code, player_name: "Jane Smith"})
+      conn =
+        post(conn, ~p"/api/games/join", %{"game_code" => game.code, "player_name" => "Jane Smith"})
 
       assert %{
                "game_id" => game_id,
@@ -129,7 +130,9 @@ defmodule JetLagServerWeb.API.GameControllerTest do
     end
 
     test "renders 404 when game does not exist", %{conn: conn} do
-      conn = post(conn, ~p"/api/games/join", %{game_code: "INVALID", player_name: "Jane Smith"})
+      conn =
+        post(conn, ~p"/api/games/join", %{"game_code" => "INVALID", "player_name" => "Jane Smith"})
+
       assert json_response(conn, 404)["errors"]["detail"] == "Not Found"
     end
   end

@@ -1,6 +1,8 @@
 defmodule JetLagServerWeb.Router do
   use JetLagServerWeb, :router
 
+  alias JetLagServerWeb.ApiSpec
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -12,12 +14,21 @@ defmodule JetLagServerWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug OpenApiSpex.Plug.PutApiSpec, module: ApiSpec
   end
 
   scope "/", JetLagServerWeb do
     pipe_through :browser
 
     get "/", PageController, :home
+  end
+
+  # OpenAPI Specification routes
+  scope "/api" do
+    pipe_through :api
+
+    get "/openapi", OpenApiSpex.Plug.RenderSpec, []
+    get "/swaggerui", OpenApiSpex.Plug.SwaggerUI, path: "/api/openapi"
   end
 
   # API routes for the Hide & Seek game
