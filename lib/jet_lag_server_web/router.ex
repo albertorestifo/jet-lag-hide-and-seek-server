@@ -39,6 +39,7 @@ defmodule JetLagServerWeb.Router do
     get "/games/:id", GameController, :show
     post "/games/:id/start", GameController, :start
     post "/games/join", GameController, :join
+    get "/games/check/:code", GameController, :check_game_exists
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

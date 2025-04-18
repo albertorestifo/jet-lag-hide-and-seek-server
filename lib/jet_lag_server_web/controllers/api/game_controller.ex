@@ -151,4 +151,36 @@ defmodule JetLagServerWeb.API.GameController do
       error -> error
     end
   end
+
+  operation(:check_game_exists,
+    summary: "Check if a game exists",
+    description: "Checks if a game with the given code exists",
+    parameters: [
+      code: [
+        in: :path,
+        description: "Game code",
+        type: :string,
+        example: "ABC123",
+        required: true
+      ]
+    ],
+    responses: [
+      ok:
+        {"Game existence check successful", "application/json", Schemas.CheckGameExistsResponse},
+      internal_server_error: {"Server error", "application/json", Schemas.Error}
+    ]
+  )
+
+  def check_game_exists(conn, %{"code" => code}) do
+    game = Games.get_game_by_code(code)
+
+    response = %{
+      exists: game != nil,
+      game_id: if(game, do: game.id, else: nil)
+    }
+
+    conn
+    |> put_status(:ok)
+    |> json(response)
+  end
 end

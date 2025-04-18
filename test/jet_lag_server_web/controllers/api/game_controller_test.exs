@@ -137,6 +137,21 @@ defmodule JetLagServerWeb.API.GameControllerTest do
     end
   end
 
+  describe "check game exists" do
+    setup [:create_game]
+
+    test "returns true when game exists", %{conn: conn, game: game} do
+      conn = get(conn, ~p"/api/games/check/#{game.code}")
+      assert %{"exists" => true, "game_id" => game_id} = json_response(conn, 200)
+      assert game_id == game.id
+    end
+
+    test "returns false when game does not exist", %{conn: conn} do
+      conn = get(conn, ~p"/api/games/check/INVALID")
+      assert %{"exists" => false, "game_id" => nil} = json_response(conn, 200)
+    end
+  end
+
   defp create_game(_) do
     game = game_fixture()
     %{game: game}
