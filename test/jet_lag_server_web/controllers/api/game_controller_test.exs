@@ -9,23 +9,15 @@ defmodule JetLagServerWeb.API.GameControllerTest do
 
   describe "create game" do
     setup do
-      # Create a location in the database that we can reference by ID
-      {:ok, location} =
-        JetLagServer.Games.create_location(%{
-          name: "Madrid",
-          type: "City",
-          coordinates: [-3.7038, 40.4168],
-          bounding_box: [-3.8, 40.3, -3.6, 40.5],
-          osm_id: "12345678",
-          osm_type: "way"
-        })
+      # Create a cached boundary in the database that we can reference by ID
+      cached = JetLagServer.GamesFixtures.cached_boundary_fixture()
 
-      %{location: location}
+      %{cached: cached}
     end
 
-    test "renders game when data is valid", %{conn: conn, location: location} do
+    test "renders game when data is valid", %{conn: conn, cached: cached} do
       valid_attrs = %{
-        location_id: "#{location.osm_type}:#{location.osm_id}",
+        location_id: "#{cached.osm_type}:#{cached.osm_id}",
         settings: %{
           units: "iso",
           hiding_zones: ["bus_stops", "local_trains"],
@@ -107,7 +99,7 @@ defmodule JetLagServerWeb.API.GameControllerTest do
       assert data["id"] == game.id
       assert data["code"] == game.code
       assert data["status"] == "waiting"
-      assert data["location"]["name"] == "Madrid"
+      # The location name comes from the cached boundary
       assert data["settings"]["units"] == "iso"
       assert [player] = data["players"]
       assert player["name"] == "John Doe"

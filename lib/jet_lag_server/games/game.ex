@@ -8,8 +8,9 @@ defmodule JetLagServer.Games.Game do
     field :code, :string
     field :status, :string, default: "waiting"
     field :started_at, :utc_datetime, default: nil
-    
-    belongs_to :location, JetLagServer.Games.Location, type: :binary_id
+    field :osm_type, :string
+    field :osm_id, :string
+
     belongs_to :settings, JetLagServer.Games.GameSettings, type: :binary_id
     has_many :players, JetLagServer.Games.Player
 
@@ -19,20 +20,20 @@ defmodule JetLagServer.Games.Game do
   @doc false
   def changeset(game, attrs) do
     game
-    |> cast(attrs, [:code, :status, :started_at, :location_id, :settings_id])
-    |> validate_required([:code, :status])
+    |> cast(attrs, [:code, :status, :started_at, :osm_type, :osm_id, :settings_id])
+    |> validate_required([:code, :status, :osm_type, :osm_id])
     |> validate_format(:code, ~r/^[A-Z0-9]{6}$/)
     |> validate_inclusion(:status, ["waiting", "active", "completed"])
     |> unique_constraint(:code)
   end
-  
+
   @doc """
   Generates a random 6-character game code.
   """
   def generate_code do
     chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     code_length = 6
-    
+
     1..code_length
     |> Enum.map(fn _ -> String.at(chars, :rand.uniform(String.length(chars)) - 1) end)
     |> Enum.join("")

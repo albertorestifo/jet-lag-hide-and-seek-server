@@ -6,14 +6,16 @@ defmodule JetLagServer.Games do
   import Ecto.Query, warn: false
   alias JetLagServer.Repo
 
-  alias JetLagServer.Games.{Game, Player, Location, GameSettings}
+  alias JetLagServer.Games.{Game, Player, GameSettings}
+  alias JetLagServer.Geocoding.CachedBoundary
+  alias JetLagServer.Geocoding
 
   @doc """
   Returns the list of games.
   """
   def list_games do
     Repo.all(Game)
-    |> Repo.preload([:location, :settings, :players])
+    |> Repo.preload([:settings, :players])
   end
 
   @doc """
@@ -21,7 +23,7 @@ defmodule JetLagServer.Games do
   """
   def get_game(id) do
     Repo.get(Game, id)
-    |> Repo.preload([:location, :settings, :players])
+    |> Repo.preload([:settings, :players])
   end
 
   @doc """
@@ -29,14 +31,32 @@ defmodule JetLagServer.Games do
   """
   def get_game_by_code(code) do
     Repo.get_by(Game, code: code)
-    |> Repo.preload([:location, :settings, :players])
+    |> Repo.preload([:settings, :players])
   end
 
   @doc """
-  Gets a location by its OSM type and ID.
+  Gets a cached boundary by its OSM type and ID.
   """
-  def get_location_by_osm(osm_type, osm_id) do
-    Repo.get_by(Location, osm_type: osm_type, osm_id: osm_id)
+  def get_cached_boundary(osm_type, osm_id) do
+    Repo.get_by(CachedBoundary, osm_type: osm_type, osm_id: osm_id)
+  end
+
+  @doc """
+  Gets location data for a game.
+  """
+  def get_location_data(game) do
+    case get_cached_boundary(game.osm_type, game.osm_id) do
+      nil ->
+        nil
+
+      cached ->
+        cached_data = Jason.decode!(cached.data)
+
+        struct(
+          Geocoding.Structs.Boundary,
+          Map.new(cached_data, fn {k, v} -> {String.to_atom(k), v} end)
+        )
+    end
   end
 
   @doc """
@@ -49,9 +69,9 @@ defmodule JetLagServer.Games do
     # Get location ID, handling both string and atom keys
     location_id = Map.get(attrs, :location_id, Map.get(attrs, "location_id"))
 
-    # Get the location from the database
+    # Get the location info from the database
     case get_location_from_id(location_id) do
-      {:ok, location} ->
+      {:ok, location_info} ->
         # Get settings data, handling both string and atom keys
         settings_data = Map.get(attrs, :settings, Map.get(attrs, "settings"))
 
@@ -67,7 +87,8 @@ defmodule JetLagServer.Games do
               %Game{}
               |> Game.changeset(%{
                 code: code,
-                location_id: location.id,
+                osm_type: location_info.osm_type,
+                osm_id: location_info.osm_id,
                 settings_id: settings.id
               })
               |> Repo.insert()
@@ -92,13 +113,13 @@ defmodule JetLagServer.Games do
     end
   end
 
-  # Get a location from a location ID string (format: "osm_type:osm_id")
+  # Get location info from a location ID string (format: "osm_type:osm_id")
   defp get_location_from_id(location_id) when is_binary(location_id) do
     case String.split(location_id, ":") do
       [osm_type, osm_id] ->
-        case get_location_by_osm(osm_type, osm_id) do
+        case get_cached_boundary(osm_type, osm_id) do
           nil -> {:error, :location_not_found}
-          location -> {:ok, location}
+          _cached -> {:ok, %{osm_type: osm_type, osm_id: osm_id}}
         end
 
       _ ->
@@ -151,15 +172,6 @@ defmodule JetLagServer.Games do
   """
   def delete_game(%Game{} = game) do
     Repo.delete(game)
-  end
-
-  @doc """
-  Creates a location.
-  """
-  def create_location(attrs \\ %{}) do
-    %Location{}
-    |> Location.changeset(attrs)
-    |> Repo.insert()
   end
 
   @doc """

@@ -2,7 +2,8 @@ defmodule JetLagServer.GamesTest do
   use JetLagServer.DataCase
 
   alias JetLagServer.Games
-  alias JetLagServer.Games.{Game, Player, Location, GameSettings}
+  alias JetLagServer.Games.{Game, Player, GameSettings}
+  alias JetLagServer.Geocoding.CachedBoundary
   import JetLagServer.GamesFixtures
 
   describe "games" do
@@ -25,19 +26,11 @@ defmodule JetLagServer.GamesTest do
     end
 
     test "create_game/1 with valid location_id creates a game" do
-      # Create a location first
-      {:ok, location} =
-        Games.create_location(%{
-          name: "Madrid",
-          type: "City",
-          coordinates: [-3.7038, 40.4168],
-          bounding_box: [-3.8, 40.3, -3.6, 40.5],
-          osm_id: "12345678",
-          osm_type: "way"
-        })
+      # Create a cached boundary first
+      cached = cached_boundary_fixture()
 
       valid_attrs = %{
-        location_id: "#{location.osm_type}:#{location.osm_id}",
+        location_id: "#{cached.osm_type}:#{cached.osm_id}",
         settings: %{
           units: "iso",
           hiding_zones: ["bus_stops", "local_trains"],
@@ -55,7 +48,8 @@ defmodule JetLagServer.GamesTest do
       assert game.code =~ ~r/^[A-Z0-9]{6}$/
       assert game.status == "waiting"
       assert game.started_at == nil
-      assert game.location.name == "Madrid"
+      assert game.osm_type == cached.osm_type
+      assert game.osm_id == cached.osm_id
       assert game.settings.units == "iso"
       assert [player] = game.players
       assert player.name == "John Doe"
@@ -113,39 +107,39 @@ defmodule JetLagServer.GamesTest do
     end
   end
 
-  describe "locations" do
-    test "create_location/1 with valid data creates a location" do
-      valid_attrs = %{
-        name: "Madrid",
-        type: "City",
-        coordinates: [-3.7038, 40.4168],
-        bounding_box: [-3.8, 40.3, -3.6, 40.5],
-        osm_id: "12345678",
-        osm_type: "way"
-      }
+  describe "cached boundaries" do
+    test "get_cached_boundary/2 returns the cached boundary with given osm_type and osm_id" do
+      cached = cached_boundary_fixture()
 
-      assert {:ok, %Location{} = location} = Games.create_location(valid_attrs)
-      assert location.name == "Madrid"
-      assert location.type == "City"
-      assert location.coordinates == [-3.7038, 40.4168]
-      assert location.bounding_box == [-3.8, 40.3, -3.6, 40.5]
-      assert location.osm_id == "12345678"
-      assert location.osm_type == "way"
+      assert %CachedBoundary{} =
+               found_cached = Games.get_cached_boundary(cached.osm_type, cached.osm_id)
+
+      assert found_cached.id == cached.id
+      assert found_cached.osm_type == cached.osm_type
+      assert found_cached.osm_id == cached.osm_id
     end
 
-    test "get_location_by_osm/2 returns the location with given osm_type and osm_id" do
-      location = location_fixture()
-
-      assert %Location{} =
-               found_location = Games.get_location_by_osm(location.osm_type, location.osm_id)
-
-      assert found_location.id == location.id
-      assert found_location.osm_type == location.osm_type
-      assert found_location.osm_id == location.osm_id
+    test "get_cached_boundary/2 returns nil when cached boundary does not exist" do
+      assert Games.get_cached_boundary("way", "999999") == nil
     end
 
-    test "get_location_by_osm/2 returns nil when location does not exist" do
-      assert Games.get_location_by_osm("way", "999999") == nil
+    test "get_location_data/1 returns boundary data for a game" do
+      cached = cached_boundary_fixture()
+      game = %Game{osm_type: cached.osm_type, osm_id: cached.osm_id}
+
+      location_data = Games.get_location_data(game)
+
+      assert location_data != nil
+      assert location_data.name == "Madrid"
+      assert location_data.type == "city"
+      assert location_data.coordinates == [-3.7038, 40.4168]
+      assert location_data.osm_id == cached.osm_id
+      assert location_data.osm_type == cached.osm_type
+    end
+
+    test "get_location_data/1 returns nil when cached boundary does not exist" do
+      game = %Game{osm_type: "way", osm_id: "999999"}
+      assert Games.get_location_data(game) == nil
     end
   end
 

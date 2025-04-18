@@ -5,9 +5,9 @@ defmodule JetLagServer.GamesFixtures do
   """
 
   @doc """
-  Generate a valid location.
+  Generate a valid cached boundary.
   """
-  def location_fixture(attrs \\ %{}) do
+  def cached_boundary_fixture(attrs \\ %{}) do
     # Generate a unique osm_id if not provided
     attrs =
       if Map.has_key?(attrs, :osm_id) || Map.has_key?(attrs, "osm_id") do
@@ -17,18 +17,33 @@ defmodule JetLagServer.GamesFixtures do
         Map.put(attrs, :osm_id, random_id)
       end
 
-    {:ok, location} =
-      attrs
-      |> Enum.into(%{
-        name: "Madrid",
-        type: "City",
-        coordinates: [-3.7038, 40.4168],
-        bounding_box: [-3.8, 40.3, -3.6, 40.5],
-        osm_type: "way"
-      })
-      |> JetLagServer.Games.create_location()
+    # Create a boundary struct
+    boundary = %JetLagServer.Geocoding.Structs.Boundary{
+      name: "Madrid",
+      type: "city",
+      osm_id: Map.get(attrs, :osm_id) || Map.get(attrs, "osm_id"),
+      osm_type: Map.get(attrs, :osm_type, "way"),
+      coordinates: [-3.7038, 40.4168],
+      boundaries: %{
+        "type" => "Polygon",
+        "coordinates" => [[[-3.8, 40.3], [-3.8, 40.5], [-3.6, 40.5], [-3.6, 40.3], [-3.8, 40.3]]]
+      }
+    }
 
-    location
+    # Encode the boundary to JSON
+    data = Jason.encode!(boundary)
+
+    # Create the cached boundary
+    {:ok, cached} =
+      %JetLagServer.Geocoding.CachedBoundary{}
+      |> JetLagServer.Geocoding.CachedBoundary.changeset(%{
+        osm_type: Map.get(attrs, :osm_type, "way"),
+        osm_id: Map.get(attrs, :osm_id) || Map.get(attrs, "osm_id"),
+        data: data
+      })
+      |> JetLagServer.Repo.insert()
+
+    cached
   end
 
   @doc """
@@ -54,13 +69,13 @@ defmodule JetLagServer.GamesFixtures do
   Generate a game with a location, settings, and a creator player.
   """
   def game_fixture(attrs \\ %{}) do
-    # Create a location first if not provided
-    location = Map.get(attrs, :location) || location_fixture()
+    # Create a cached boundary first if not provided
+    cached = Map.get(attrs, :cached_boundary) || cached_boundary_fixture()
 
     # Create a game with default values
     {:ok, game} =
       JetLagServer.Games.create_game(%{
-        location_id: Map.get(attrs, :location_id, "#{location.osm_type}:#{location.osm_id}"),
+        location_id: Map.get(attrs, :location_id, "#{cached.osm_type}:#{cached.osm_id}"),
         settings:
           Map.get(attrs, :settings, %{
             units: "iso",

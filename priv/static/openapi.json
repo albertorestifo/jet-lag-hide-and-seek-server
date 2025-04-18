@@ -39,13 +39,10 @@
             ],
             "type": "object"
           },
-          "location": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Location"
-              }
-            ],
-            "description": "Location of the game"
+          "location_id": {
+            "description": "ID of the location in format 'osm_type:osm_id'",
+            "example": "way:123456",
+            "type": "string"
           },
           "settings": {
             "allOf": [
@@ -57,7 +54,7 @@
           }
         },
         "required": [
-          "location",
+          "location_id",
           "settings",
           "creator"
         ],

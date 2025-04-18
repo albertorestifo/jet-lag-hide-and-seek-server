@@ -8,7 +8,8 @@ defmodule JetLagServer.Games.GameTest do
       valid_attrs = %{
         code: "ABC123",
         status: "waiting",
-        location_id: Ecto.UUID.generate(),
+        osm_type: "way",
+        osm_id: "12345678",
         settings_id: Ecto.UUID.generate()
       }
 
@@ -21,7 +22,8 @@ defmodule JetLagServer.Games.GameTest do
         # lowercase not allowed
         code: "abc123",
         status: "waiting",
-        location_id: Ecto.UUID.generate(),
+        osm_type: "way",
+        osm_id: "12345678",
         settings_id: Ecto.UUID.generate()
       }
 
@@ -33,7 +35,8 @@ defmodule JetLagServer.Games.GameTest do
       invalid_attrs = %{
         code: "ABC123",
         status: "invalid_status",
-        location_id: Ecto.UUID.generate(),
+        osm_type: "way",
+        osm_id: "12345678",
         settings_id: Ecto.UUID.generate()
       }
 

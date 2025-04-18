@@ -16,20 +16,6 @@ defmodule JetLagServer.Games.Structs do
       :osm_id,
       :osm_type
     ]
-
-    @doc """
-    Converts a Location schema to a Location struct.
-    """
-    def from_schema(%JetLagServer.Games.Location{} = location) do
-      %__MODULE__{
-        name: location.name,
-        type: location.type,
-        coordinates: location.coordinates,
-        bounding_box: location.bounding_box,
-        osm_id: location.osm_id,
-        osm_type: location.osm_type
-      }
-    end
   end
 
   defmodule GameSettings do
@@ -104,10 +90,34 @@ defmodule JetLagServer.Games.Structs do
     Converts a Game schema to a Game struct.
     """
     def from_schema(%JetLagServer.Games.Game{} = game) do
+      # Get location data from cached boundary
+      location_data = JetLagServer.Games.get_location_data(game)
+
+      # Create a location struct from the boundary data
+      location =
+        if location_data do
+          %Location{
+            name: location_data.name,
+            type: location_data.type,
+            coordinates: location_data.coordinates,
+            osm_id: game.osm_id,
+            osm_type: game.osm_type
+          }
+        else
+          # Fallback if location data is not available
+          %Location{
+            name: "Unknown",
+            type: "unknown",
+            coordinates: nil,
+            osm_id: game.osm_id,
+            osm_type: game.osm_type
+          }
+        end
+
       %__MODULE__{
         id: game.id,
         code: game.code,
-        location: Location.from_schema(game.location),
+        location: location,
         settings: GameSettings.from_schema(game.settings),
         players: Enum.map(game.players, &Player.from_schema/1),
         status: game.status,
