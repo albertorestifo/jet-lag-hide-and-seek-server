@@ -8,16 +8,24 @@ defmodule JetLagServerWeb.API.GameControllerTest do
   end
 
   describe "create game" do
-    test "renders game when data is valid", %{conn: conn} do
-      valid_attrs = %{
-        location: %{
+    setup do
+      # Create a location in the database that we can reference by ID
+      {:ok, location} =
+        JetLagServer.Games.create_location(%{
           name: "Madrid",
           type: "City",
           coordinates: [-3.7038, 40.4168],
           bounding_box: [-3.8, 40.3, -3.6, 40.5],
           osm_id: "12345678",
           osm_type: "way"
-        },
+        })
+
+      %{location: location}
+    end
+
+    test "renders game when data is valid", %{conn: conn, location: location} do
+      valid_attrs = %{
+        location_id: "#{location.osm_type}:#{location.osm_id}",
         settings: %{
           units: "iso",
           hiding_zones: ["bus_stops", "local_trains"],
@@ -41,14 +49,10 @@ defmodule JetLagServerWeb.API.GameControllerTest do
       assert websocket_url =~ ~r/^wss:\/\/localhost\/ws\/games\/#{game_id}\?token=/
     end
 
-    test "renders errors when data is invalid", %{conn: conn} do
+    test "renders error when location does not exist", %{conn: conn} do
       invalid_attrs = %{
-        location: %{
-          # Missing name and coordinates
-          type: "City",
-          osm_id: "12345678",
-          osm_type: "way"
-        },
+        # Non-existent location
+        location_id: "way:999999",
         settings: %{
           units: "iso",
           hiding_zones: ["bus_stops", "local_trains"],
@@ -63,7 +67,30 @@ defmodule JetLagServerWeb.API.GameControllerTest do
       }
 
       conn = post(conn, ~p"/api/games", invalid_attrs)
-      assert json_response(conn, 400)["code"] == "validation_error"
+      assert json_response(conn, 400)["message"] == "Location not found"
+    end
+
+    test "renders error when location ID format is invalid", %{conn: conn} do
+      invalid_attrs = %{
+        # Invalid format
+        location_id: "invalid-format",
+        settings: %{
+          units: "iso",
+          hiding_zones: ["bus_stops", "local_trains"],
+          hiding_zone_size: 500,
+          game_duration: 1,
+          day_start_time: "09:00",
+          day_end_time: "18:00"
+        },
+        creator: %{
+          name: "John Doe"
+        }
+      }
+
+      conn = post(conn, ~p"/api/games", invalid_attrs)
+
+      assert json_response(conn, 400)["message"] ==
+               "Invalid location ID format. Expected format: osm_type:osm_id"
     end
   end
 

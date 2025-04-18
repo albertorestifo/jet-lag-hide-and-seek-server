@@ -20,14 +20,7 @@ Creates a new hide and seek game with the specified settings.
 
 ```json
 {
-  "location": {
-    "name": "Madrid",
-    "type": "City",
-    "coordinates": [-3.7038, 40.4168],
-    "boundingBox": [-3.8, 40.3, -3.6, 40.5],
-    "osmId": "12345678",
-    "osmType": "way"
-  },
+  "location_id": "way:12345678",
   "settings": {
     "units": "iso",
     "hidingZones": ["bus_stops", "local_trains"],
@@ -41,6 +34,8 @@ Creates a new hide and seek game with the specified settings.
   }
 }
 ```
+
+**Note:** The `location_id` must be in the format `osm_type:osm_id` and must reference a location that exists in the database. You can get valid location IDs from the geocoding autocomplete API.
 
 **Response:**
 

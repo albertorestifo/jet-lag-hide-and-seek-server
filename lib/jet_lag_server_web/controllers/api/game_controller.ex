@@ -23,13 +23,13 @@ defmodule JetLagServerWeb.API.GameController do
   )
 
   def create(conn, %{
-        "location" => location_params,
+        "location_id" => location_id,
         "settings" => settings_params,
         "creator" => creator_params
       }) do
     with {:ok, game} <-
            Games.create_game(%{
-             location: location_params,
+             location_id: location_id,
              settings: settings_params,
              creator: creator_params
            }) do
@@ -40,6 +40,33 @@ defmodule JetLagServerWeb.API.GameController do
       |> put_status(:created)
       |> put_resp_header("location", "/api/games/#{game.id}")
       |> render(:created, game: game, token: token)
+    else
+      {:error, :location_not_found} ->
+        conn
+        |> put_status(:bad_request)
+        |> put_view(JetLagServerWeb.ErrorJSON)
+        |> render(:error, status: 400, message: "Location not found")
+        |> halt()
+
+      {:error, :invalid_location_id_format} ->
+        conn
+        |> put_status(:bad_request)
+        |> put_view(JetLagServerWeb.ErrorJSON)
+        |> render(:error,
+          status: 400,
+          message: "Invalid location ID format. Expected format: osm_type:osm_id"
+        )
+        |> halt()
+
+      {:error, :invalid_location_id} ->
+        conn
+        |> put_status(:bad_request)
+        |> put_view(JetLagServerWeb.ErrorJSON)
+        |> render(:error, status: 400, message: "Invalid location ID")
+        |> halt()
+
+      error ->
+        error
     end
   end
 

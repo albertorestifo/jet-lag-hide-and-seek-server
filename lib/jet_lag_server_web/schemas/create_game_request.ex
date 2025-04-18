@@ -4,17 +4,18 @@ defmodule JetLagServerWeb.Schemas.CreateGameRequest do
   """
   require OpenApiSpex
   alias OpenApiSpex.Schema
-  alias JetLagServerWeb.Schemas.{Location, GameSettings}
+  alias JetLagServerWeb.Schemas.GameSettings
 
   OpenApiSpex.schema(%{
     title: "CreateGameRequest",
     description: "Request to create a new game",
     type: :object,
-    required: [:location, :settings, :creator],
+    required: [:location_id, :settings, :creator],
     properties: %{
-      location: %Schema{
-        allOf: [Location],
-        description: "Location of the game"
+      location_id: %Schema{
+        type: :string,
+        description: "ID of the location in format 'osm_type:osm_id'",
+        example: "way:123456"
       },
       settings: %Schema{
         allOf: [GameSettings],

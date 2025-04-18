@@ -24,16 +24,20 @@ defmodule JetLagServer.GamesTest do
       assert code == game.code
     end
 
-    test "create_game/1 with valid data creates a game" do
-      valid_attrs = %{
-        location: %{
+    test "create_game/1 with valid location_id creates a game" do
+      # Create a location first
+      {:ok, location} =
+        Games.create_location(%{
           name: "Madrid",
           type: "City",
           coordinates: [-3.7038, 40.4168],
           bounding_box: [-3.8, 40.3, -3.6, 40.5],
           osm_id: "12345678",
           osm_type: "way"
-        },
+        })
+
+      valid_attrs = %{
+        location_id: "#{location.osm_type}:#{location.osm_id}",
         settings: %{
           units: "iso",
           hiding_zones: ["bus_stops", "local_trains"],
@@ -56,6 +60,46 @@ defmodule JetLagServer.GamesTest do
       assert [player] = game.players
       assert player.name == "John Doe"
       assert player.is_creator == true
+    end
+
+    test "create_game/1 with non-existent location_id returns error" do
+      invalid_attrs = %{
+        # Non-existent location
+        location_id: "way:999999",
+        settings: %{
+          units: "iso",
+          hiding_zones: ["bus_stops", "local_trains"],
+          hiding_zone_size: 500,
+          game_duration: 1,
+          day_start_time: "09:00",
+          day_end_time: "18:00"
+        },
+        creator: %{
+          name: "John Doe"
+        }
+      }
+
+      assert {:error, :location_not_found} = Games.create_game(invalid_attrs)
+    end
+
+    test "create_game/1 with invalid location_id format returns error" do
+      invalid_attrs = %{
+        # Invalid format
+        location_id: "invalid-format",
+        settings: %{
+          units: "iso",
+          hiding_zones: ["bus_stops", "local_trains"],
+          hiding_zone_size: 500,
+          game_duration: 1,
+          day_start_time: "09:00",
+          day_end_time: "18:00"
+        },
+        creator: %{
+          name: "John Doe"
+        }
+      }
+
+      assert {:error, :invalid_location_id_format} = Games.create_game(invalid_attrs)
     end
 
     test "start_game/1 updates the game status and sets started_at" do
@@ -87,6 +131,21 @@ defmodule JetLagServer.GamesTest do
       assert location.bounding_box == [-3.8, 40.3, -3.6, 40.5]
       assert location.osm_id == "12345678"
       assert location.osm_type == "way"
+    end
+
+    test "get_location_by_osm/2 returns the location with given osm_type and osm_id" do
+      location = location_fixture()
+
+      assert %Location{} =
+               found_location = Games.get_location_by_osm(location.osm_type, location.osm_id)
+
+      assert found_location.id == location.id
+      assert found_location.osm_type == location.osm_type
+      assert found_location.osm_id == location.osm_id
+    end
+
+    test "get_location_by_osm/2 returns nil when location does not exist" do
+      assert Games.get_location_by_osm("way", "999999") == nil
     end
   end
 

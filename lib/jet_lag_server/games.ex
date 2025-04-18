@@ -33,17 +33,24 @@ defmodule JetLagServer.Games do
   end
 
   @doc """
+  Gets a location by its OSM type and ID.
+  """
+  def get_location_by_osm(osm_type, osm_id) do
+    Repo.get_by(Location, osm_type: osm_type, osm_id: osm_id)
+  end
+
+  @doc """
   Creates a game.
   """
   def create_game(attrs \\ %{}) do
     # Generate a unique game code
     code = generate_unique_code()
 
-    # Get location data, handling both string and atom keys
-    location_data = Map.get(attrs, :location, Map.get(attrs, "location"))
+    # Get location ID, handling both string and atom keys
+    location_id = Map.get(attrs, :location_id, Map.get(attrs, "location_id"))
 
-    # Create the location
-    case create_location(location_data) do
+    # Get the location from the database
+    case get_location_from_id(location_id) do
       {:ok, location} ->
         # Get settings data, handling both string and atom keys
         settings_data = Map.get(attrs, :settings, Map.get(attrs, "settings"))
@@ -84,6 +91,22 @@ defmodule JetLagServer.Games do
         error
     end
   end
+
+  # Get a location from a location ID string (format: "osm_type:osm_id")
+  defp get_location_from_id(location_id) when is_binary(location_id) do
+    case String.split(location_id, ":") do
+      [osm_type, osm_id] ->
+        case get_location_by_osm(osm_type, osm_id) do
+          nil -> {:error, :location_not_found}
+          location -> {:ok, location}
+        end
+
+      _ ->
+        {:error, :invalid_location_id_format}
+    end
+  end
+
+  defp get_location_from_id(_), do: {:error, :invalid_location_id}
 
   @doc """
   Updates a game.
