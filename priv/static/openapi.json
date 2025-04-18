@@ -384,21 +384,6 @@
             "description": "GeoJSON representation of the boundaries",
             "type": "object"
           },
-          "bounding_box": {
-            "description": "Bounding box coordinates [minLon, minLat, maxLon, maxLat]",
-            "example": [
-              -3.8,
-              40.3,
-              -3.6,
-              40.5
-            ],
-            "items": {
-              "type": "number"
-            },
-            "maxItems": 4,
-            "minItems": 4,
-            "type": "array"
-          },
           "coordinates": {
             "description": "Centroid coordinates [longitude, latitude]",
             "example": [
@@ -533,6 +518,14 @@
         ],
         "title": "Player",
         "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "bearerFormat": "JWT",
+        "description": "Enter the token you received when creating or joining a game",
+        "scheme": "bearer",
+        "type": "http"
       }
     }
   },
@@ -741,6 +734,16 @@
             },
             "description": "Game details retrieved successfully"
           },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
           "404": {
             "content": {
               "application/json": {
@@ -762,6 +765,11 @@
             "description": "Server error"
           }
         },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "summary": "Get game details",
         "tags": [
           "games"
@@ -771,7 +779,7 @@
     "/api/games/{id}/start": {
       "post": {
         "callbacks": {},
-        "description": "Starts a game, preventing new players from joining",
+        "description": "Starts a game, preventing new players from joining. Only the game creator can start the game.",
         "operationId": "JetLagServerWeb.API.GameController.start",
         "parameters": [
           {
@@ -801,6 +809,26 @@
             },
             "description": "Game started successfully"
           },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Forbidden - only the creator can start the game"
+          },
           "404": {
             "content": {
               "application/json": {
@@ -822,6 +850,11 @@
             "description": "Server error"
           }
         },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "summary": "Start a game",
         "tags": [
           "games"

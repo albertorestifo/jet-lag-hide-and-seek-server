@@ -17,6 +17,10 @@ defmodule JetLagServerWeb.Router do
     plug OpenApiSpex.Plug.PutApiSpec, module: ApiSpec
   end
 
+  pipeline :authenticate_player do
+    plug JetLagServerWeb.Plugs.AuthenticatePlayer
+  end
+
   scope "/", JetLagServerWeb do
     pipe_through :browser
 
@@ -42,14 +46,20 @@ defmodule JetLagServerWeb.Router do
     pipe_through :api
 
     post "/games", GameController, :create
-    get "/games/:id", GameController, :show
-    post "/games/:id/start", GameController, :start
     post "/games/join", GameController, :join
     get "/games/check/:code", GameController, :check_game_exists
 
     # Geocoding endpoints
     get "/geocoding/autocomplete", GeocodingController, :autocomplete
     get "/geocoding/boundaries/:id", GeocodingController, :boundaries
+  end
+
+  # Authenticated API routes
+  scope "/api", JetLagServerWeb.API, as: :api do
+    pipe_through [:api, :authenticate_player]
+
+    get "/games/:id", GameController, :show
+    post "/games/:id/start", GameController, :start
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

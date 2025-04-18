@@ -37,6 +37,19 @@ defmodule JetLagServerWeb.ErrorJSON do
     }
   end
 
+  def error(%{status: status, message: message}) do
+    # For custom error responses
+    %{
+      code: status_to_code(status),
+      message: message
+    }
+  end
+
+  defp status_to_code(401), do: "unauthorized"
+  defp status_to_code(403), do: "forbidden"
+  defp status_to_code(404), do: "not_found"
+  defp status_to_code(_), do: "error"
+
   defp traverse_errors(changeset) do
     Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
       Regex.replace(~r"%{(\w+)}", msg, fn _, key ->

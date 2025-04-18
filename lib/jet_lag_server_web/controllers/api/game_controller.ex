@@ -55,16 +55,19 @@ defmodule JetLagServerWeb.API.GameController do
         required: true
       ]
     ],
+    security: [%{"bearerAuth" => []}],
     responses: [
       ok:
         {"Game details retrieved successfully", "application/json",
          %Schema{type: :object, properties: %{data: Schemas.Game}}},
       not_found: {"Game not found", "application/json", Schemas.Error},
+      unauthorized: {"Unauthorized", "application/json", Schemas.Error},
       internal_server_error: {"Server error", "application/json", Schemas.Error}
     ]
   )
 
   def show(conn, %{"id" => id}) do
+    # The game_id is already verified in the authentication plug
     with %Game{} = game <- Games.get_game(id) do
       render(conn, :show, game: game)
     else
@@ -74,7 +77,8 @@ defmodule JetLagServerWeb.API.GameController do
 
   operation(:start,
     summary: "Start a game",
-    description: "Starts a game, preventing new players from joining",
+    description:
+      "Starts a game, preventing new players from joining. Only the game creator can start the game.",
     parameters: [
       id: [
         in: :path,
@@ -84,22 +88,39 @@ defmodule JetLagServerWeb.API.GameController do
         required: true
       ]
     ],
+    security: [%{"bearerAuth" => []}],
     responses: [
       ok:
         {"Game started successfully", "application/json",
          %Schema{type: :object, properties: %{data: Schemas.Game}}},
       not_found: {"Game not found", "application/json", Schemas.Error},
+      unauthorized: {"Unauthorized", "application/json", Schemas.Error},
+      forbidden:
+        {"Forbidden - only the creator can start the game", "application/json", Schemas.Error},
       internal_server_error: {"Server error", "application/json", Schemas.Error}
     ]
   )
 
   def start(conn, %{"id" => id}) do
+    current_player = conn.assigns.current_player
+
     with %Game{} = game <- Games.get_game(id),
+         true <- current_player.is_creator || {:error, :forbidden},
          {:ok, game} <- Games.start_game(game) do
       render(conn, :show, game: game)
     else
-      nil -> {:error, :not_found}
-      error -> error
+      nil ->
+        {:error, :not_found}
+
+      {:error, :forbidden} ->
+        conn
+        |> put_status(:forbidden)
+        |> put_view(JetLagServerWeb.ErrorJSON)
+        |> render(:error, status: 403, message: "Only the game creator can start the game")
+        |> halt()
+
+      error ->
+        error
     end
   end
 

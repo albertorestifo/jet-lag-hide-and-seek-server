@@ -3,7 +3,7 @@ defmodule JetLagServerWeb.ApiSpec do
   API Specification for the JetLag Hide & Seek game.
   """
 
-  alias OpenApiSpex.{Components, Info, OpenApi, Paths, Server}
+  alias OpenApiSpex.{Components, Info, OpenApi, Paths, Server, SecurityScheme}
   alias JetLagServerWeb.{Endpoint, Router}
 
   @behaviour OpenApi
@@ -37,6 +37,14 @@ defmodule JetLagServerWeb.ApiSpec do
           CheckGameExistsResponse: JetLagServerWeb.Schemas.CheckGameExistsResponse,
           LocationSearchResult: JetLagServerWeb.Schemas.LocationSearchResult,
           LocationBoundaries: JetLagServerWeb.Schemas.LocationBoundaries
+        },
+        securitySchemes: %{
+          bearerAuth: %SecurityScheme{
+            type: "http",
+            scheme: "bearer",
+            bearerFormat: "JWT",
+            description: "Enter the token you received when creating or joining a game"
+          }
         }
       }
     }

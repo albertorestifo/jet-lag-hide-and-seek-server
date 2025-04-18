@@ -68,10 +68,14 @@ defmodule JetLagServerWeb.API.GameControllerTest do
   end
 
   describe "show game" do
-    setup [:create_game]
+    setup [:create_game_with_token]
 
-    test "renders game when game exists", %{conn: conn, game: game} do
-      conn = get(conn, ~p"/api/games/#{game.id}")
+    test "renders game when game exists", %{conn: conn, game: game, token: token} do
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> get(~p"/api/games/#{game.id}")
+
       assert %{"data" => data} = json_response(conn, 200)
       assert data["id"] == game.id
       assert data["code"] == game.code
@@ -83,25 +87,68 @@ defmodule JetLagServerWeb.API.GameControllerTest do
       assert player["is_creator"] == true
     end
 
-    test "renders 404 when game does not exist", %{conn: conn} do
-      conn = get(conn, ~p"/api/games/#{Ecto.UUID.generate()}")
+    test "renders 401 when no token is provided", %{conn: conn, game: game} do
+      conn = get(conn, ~p"/api/games/#{game.id}")
+      assert json_response(conn, 401)["code"] == "unauthorized"
+      assert json_response(conn, 401)["message"] == "Unauthorized"
+    end
+
+    test "renders 404 when game does not exist", %{conn: conn, token: token} do
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> get(~p"/api/games/#{Ecto.UUID.generate()}")
+
       assert json_response(conn, 404)["errors"]["detail"] == "Not Found"
     end
   end
 
   describe "start game" do
-    setup [:create_game]
+    setup [:create_game_with_token]
 
-    test "renders game when game exists", %{conn: conn, game: game} do
-      conn = post(conn, ~p"/api/games/#{game.id}/start")
+    test "renders game when game exists and user is creator", %{
+      conn: conn,
+      game: game,
+      token: token
+    } do
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> post(~p"/api/games/#{game.id}/start")
+
       assert %{"data" => data} = json_response(conn, 200)
       assert data["id"] == game.id
       assert data["status"] == "active"
       assert data["started_at"] != nil
     end
 
-    test "renders 404 when game does not exist", %{conn: conn} do
-      conn = post(conn, ~p"/api/games/#{Ecto.UUID.generate()}/start")
+    test "renders 401 when no token is provided", %{conn: conn, game: game} do
+      conn = post(conn, ~p"/api/games/#{game.id}/start")
+      assert json_response(conn, 401)["code"] == "unauthorized"
+      assert json_response(conn, 401)["message"] == "Unauthorized"
+    end
+
+    test "renders 403 when user is not the creator", %{conn: conn, game: game} do
+      # Create a non-creator player
+      {:ok, player} = JetLagServer.Games.add_player_to_game(game.id, "Not Creator")
+      # Generate a token for this player
+      non_creator_token = JetLagServer.Games.generate_token(game.id, player.id)
+
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{non_creator_token}")
+        |> post(~p"/api/games/#{game.id}/start")
+
+      assert json_response(conn, 403)["code"] == "forbidden"
+      assert json_response(conn, 403)["message"] == "Only the game creator can start the game"
+    end
+
+    test "renders 404 when game does not exist", %{conn: conn, token: token} do
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> post(~p"/api/games/#{Ecto.UUID.generate()}/start")
+
       assert json_response(conn, 404)["errors"]["detail"] == "Not Found"
     end
   end
@@ -179,5 +226,12 @@ defmodule JetLagServerWeb.API.GameControllerTest do
   defp create_game(_) do
     game = game_fixture()
     %{game: game}
+  end
+
+  defp create_game_with_token(_) do
+    game = game_fixture()
+    creator = List.first(game.players)
+    token = JetLagServer.Games.generate_token(game.id, creator.id)
+    %{game: game, token: token, creator: creator}
   end
 end
