@@ -18,7 +18,17 @@ defmodule JetLagServerWeb.GameChannel do
         # Find the current player
         player = Enum.find(game.players, fn p -> p.id == player_id end)
 
-        {:ok, Structs.Game.from_schema(game), assign(socket, :is_creator, player.is_creator)}
+        # Assign is_creator to the socket
+        socket = assign(socket, :is_creator, player.is_creator)
+
+        # Convert the game to a struct for the response
+        game_struct = Structs.Game.from_schema(game)
+
+        # Send the current game state to the client
+        # This is especially useful for reconnections after app restart
+        send(self(), {:after_join, game_struct})
+
+        {:ok, game_struct, socket}
 
       {:error, reason} ->
         {:error, %{reason: reason}}
@@ -73,6 +83,20 @@ defmodule JetLagServerWeb.GameChannel do
 
   def handle_in("ping", _params, socket) do
     {:reply, {:ok, %Structs.PongEvent{}}, socket}
+  end
+
+  @doc """
+  Handles the after_join message to send the game state to the client.
+  This is especially useful for reconnections after app restart.
+  """
+  def handle_info({:after_join, game}, socket) do
+    # Push the game state directly to the client
+    # This is more reliable than broadcasting and easier to test
+    push(socket, "game_state", %JetLagServer.Games.Structs.GameUpdatedEvent{
+      game: game
+    })
+
+    {:noreply, socket}
   end
 
   @doc """

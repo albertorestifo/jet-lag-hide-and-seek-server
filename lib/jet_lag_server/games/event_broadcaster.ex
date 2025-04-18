@@ -9,8 +9,11 @@ defmodule JetLagServer.Games.EventBroadcaster do
     PlayerJoinedEvent,
     PlayerLeftEvent,
     GameStartedEvent,
-    Player
+    GameUpdatedEvent,
+    Player,
+    Game
   }
+
   alias JetLagServerWeb.Endpoint
 
   @doc """
@@ -40,6 +43,17 @@ defmodule JetLagServer.Games.EventBroadcaster do
   def broadcast_game_started(game_id, started_at) do
     Endpoint.broadcast("games:#{game_id}", "game_started", %GameStartedEvent{
       started_at: started_at
+    })
+  end
+
+  @doc """
+  Broadcasts the current game state to a specific client.
+  This is used when a client reconnects to the socket.
+  """
+  @spec broadcast_game_state(String.t(), Game.t()) :: :ok
+  def broadcast_game_state(topic, game) do
+    Endpoint.broadcast(topic, "game_state", %GameUpdatedEvent{
+      game: game
     })
   end
 end

@@ -82,6 +82,52 @@ Sent when the game is started by the creator.
 }
 ```
 
+### game_state
+
+Sent when a client connects or reconnects to the WebSocket. Contains the full game state.
+
+```json
+{
+  "type": "game_state",
+  "data": {
+    "game": {
+      "id": "game-123",
+      "code": "ABC123",
+      "status": "waiting",
+      "created_at": "2023-06-15T14:30:00Z",
+      "started_at": null,
+      "location": {
+        "name": "Madrid",
+        "type": "City",
+        "coordinates": [-3.7038, 40.4168],
+        "osm_id": "12345678",
+        "osm_type": "way"
+      },
+      "settings": {
+        "units": "iso",
+        "hiding_zones": ["bus_stops", "local_trains"],
+        "hiding_zone_size": 500,
+        "game_duration": 1,
+        "day_start_time": "09:00",
+        "day_end_time": "18:00"
+      },
+      "players": [
+        {
+          "id": "player-123",
+          "name": "John Doe",
+          "is_creator": true
+        },
+        {
+          "id": "player-456",
+          "name": "Jane Smith",
+          "is_creator": false
+        }
+      ]
+    }
+  }
+}
+```
+
 ### game_updated
 
 Sent when game settings are updated.
@@ -173,10 +219,20 @@ Note: In the actual implementation, the server uses Elixir structs for all event
 ## Connection Lifecycle
 
 1. Client establishes WebSocket connection
-2. Server sends current game state
-3. Server broadcasts events as they occur
-4. Client sends messages to perform actions
-5. Connection is closed when the game ends or the client disconnects
+2. Server sends current game state in the join response
+3. Server also sends a `game_state` event with the full game state
+4. Server broadcasts events as they occur
+5. Client sends messages to perform actions
+6. Connection is closed when the game ends or the client disconnects
+
+## Reconnection
+
+If the client application restarts or loses connection, it should reconnect to the WebSocket using the same token. Upon reconnection, the server will:
+
+1. Send the current game state in the join response
+2. Send a `game_state` event with the full game state
+
+This allows the client to restore its state and continue participating in the game without disruption.
 
 ## Error Handling
 
