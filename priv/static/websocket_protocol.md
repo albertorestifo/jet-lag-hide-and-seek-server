@@ -10,6 +10,8 @@ WebSocket connections are established at the following endpoint:
 wss://api.jetlag.example.com/ws/games/{gameId}
 ```
 
+Note: The WebSocket path is `/ws` and not `/socket` as is common in Phoenix applications.
+
 Where `{gameId}` is the unique identifier for the game.
 
 ## Authentication
@@ -166,6 +168,8 @@ The server will respond with a `pong` message:
 }
 ```
 
+Note: In the actual implementation, the server uses Elixir structs for all events, which are automatically encoded to JSON when sent over the WebSocket.
+
 ## Connection Lifecycle
 
 1. Client establishes WebSocket connection
@@ -181,50 +185,3 @@ If the server encounters an error processing a message, it will respond with an 
 ## Reconnection
 
 If the connection is lost, clients should attempt to reconnect with exponential backoff. The server will send the current game state upon reconnection.
-
-## Implementation in Phoenix
-
-This WebSocket protocol can be implemented in Phoenix using channels. Here's a basic structure:
-
-```elixir
-defmodule JetLagServerWeb.GameChannel do
-  use JetLagServerWeb, :channel
-  alias JetLagServer.Games
-
-  def join("games:" <> game_id, %{"token" => token}, socket) do
-    case Games.verify_token(token, game_id) do
-      {:ok, player_id} ->
-        socket = assign(socket, :player_id, player_id)
-        socket = assign(socket, :game_id, game_id)
-        {:ok, Games.get_game(game_id), socket}
-      {:error, reason} ->
-        {:error, %{reason: reason}}
-    end
-  end
-
-  def handle_in("join_game", %{"playerName" => player_name}, socket) do
-    # Implementation
-  end
-
-  def handle_in("leave_game", _params, socket) do
-    # Implementation
-  end
-
-  def handle_in("start_game", _params, socket) do
-    # Implementation
-  end
-
-  def handle_in("ping", _params, socket) do
-    {:reply, {:ok, %{type: "pong", data: %{}}}, socket}
-  end
-
-  # Broadcast functions for server-to-client messages
-  defp broadcast_player_joined(game_id, player) do
-    JetLagServerWeb.Endpoint.broadcast("games:" <> game_id, "player_joined", %{
-      player: player
-    })
-  end
-
-  # Other broadcast functions...
-end
-```
