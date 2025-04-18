@@ -129,6 +129,30 @@ defmodule JetLagServerWeb.API.GameControllerTest do
       assert Enum.any?(game_data["players"], fn p -> p["name"] == "Jane Smith" end)
     end
 
+    test "broadcasts player_joined event when a player joins", %{conn: conn, game: game} do
+      # Subscribe to the game channel
+      JetLagServerWeb.Endpoint.subscribe("games:#{game.id}")
+
+      # Join the game
+      conn =
+        post(conn, ~p"/api/games/join", %{"game_code" => game.code, "player_name" => "Jane Smith"})
+
+      # Extract the player_id from the response
+      %{"player_id" => player_id} = json_response(conn, 200)
+
+      # Assert that we received a player_joined event
+      assert_receive %Phoenix.Socket.Broadcast{
+        event: "player_joined",
+        payload: %JetLagServer.Games.Structs.PlayerJoinedEvent{
+          player: %JetLagServer.Games.Structs.Player{
+            id: ^player_id,
+            name: "Jane Smith",
+            is_creator: false
+          }
+        }
+      }
+    end
+
     test "renders 404 when game does not exist", %{conn: conn} do
       conn =
         post(conn, ~p"/api/games/join", %{"game_code" => "INVALID", "player_name" => "Jane Smith"})

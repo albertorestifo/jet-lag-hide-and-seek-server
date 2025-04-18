@@ -95,15 +95,32 @@ defmodule JetLagServer.Games do
   end
 
   @doc """
-  Starts a game.
+  Starts a game and broadcasts a game_started event.
   """
   def start_game(%Game{} = game) do
-    game
-    |> Game.changeset(%{
-      status: "active",
-      started_at: DateTime.utc_now() |> DateTime.truncate(:second)
-    })
-    |> Repo.update()
+    started_at = DateTime.utc_now() |> DateTime.truncate(:second)
+
+    result =
+      game
+      |> Game.changeset(%{
+        status: "active",
+        started_at: started_at
+      })
+      |> Repo.update()
+
+    case result do
+      {:ok, updated_game} ->
+        # Broadcast game started event
+        JetLagServer.Games.EventBroadcaster.broadcast_game_started(
+          updated_game.id,
+          updated_game.started_at
+        )
+
+        {:ok, updated_game}
+
+      error ->
+        error
+    end
   end
 
   @doc """
@@ -148,7 +165,7 @@ defmodule JetLagServer.Games do
   end
 
   @doc """
-  Adds a player to a game.
+  Adds a player to a game and broadcasts a player_joined event.
   """
   def add_player_to_game(game_id, player_name) do
     # Create the player
@@ -158,16 +175,27 @@ defmodule JetLagServer.Games do
         game_id: game_id
       })
 
+    # Broadcast player joined event
+    player_struct = JetLagServer.Games.Structs.Player.from_schema(player)
+    JetLagServer.Games.EventBroadcaster.broadcast_player_joined(game_id, player_struct)
+
     # Return the player
     {:ok, player}
   end
 
   @doc """
-  Removes a player from a game.
+  Removes a player from a game and broadcasts a player_left event.
   """
   def remove_player_from_game(player_id) do
     player = get_player(player_id)
-    Repo.delete(player)
+    game_id = player.game_id
+
+    result = Repo.delete(player)
+
+    # Broadcast player left event
+    JetLagServer.Games.EventBroadcaster.broadcast_player_left(game_id, player_id)
+
+    result
   end
 
   # Generates a unique game code

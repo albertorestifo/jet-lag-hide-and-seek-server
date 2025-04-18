@@ -96,15 +96,6 @@ defmodule JetLagServerWeb.API.GameController do
   def start(conn, %{"id" => id}) do
     with %Game{} = game <- Games.get_game(id),
          {:ok, game} <- Games.start_game(game) do
-      # Broadcast to all connected clients that the game has started
-      JetLagServerWeb.Endpoint.broadcast(
-        "games:#{game.id}",
-        "game_started",
-        %JetLagServer.Games.Structs.GameStartedEvent{
-          started_at: game.started_at
-        }
-      )
-
       render(conn, :show, game: game)
     else
       nil -> {:error, :not_found}
@@ -129,17 +120,6 @@ defmodule JetLagServerWeb.API.GameController do
          {:ok, player} <- Games.add_player_to_game(game.id, player_name) do
       # Generate a token for WebSocket authentication
       token = Games.generate_token(game.id, player.id)
-
-      # Broadcast to all connected clients that a new player has joined
-      player_struct = JetLagServer.Games.Structs.Player.from_schema(player)
-
-      JetLagServerWeb.Endpoint.broadcast(
-        "games:#{game.id}",
-        "player_joined",
-        %JetLagServer.Games.Structs.PlayerJoinedEvent{
-          player: player_struct
-        }
-      )
 
       # Get the updated game with the new player
       game = Games.get_game(game.id)

@@ -35,13 +35,6 @@ defmodule JetLagServerWeb.GameChannel do
 
     case Games.add_player_to_game(game_id, player_name) do
       {:ok, player} ->
-        # Broadcast to all connected clients that a new player has joined
-        player_struct = Structs.Player.from_schema(player)
-
-        broadcast!(socket, "player_joined", %Structs.PlayerJoinedEvent{
-          player: player_struct
-        })
-
         {:reply, {:ok, %{player_id: player.id}}, socket}
 
       _error ->
@@ -54,11 +47,6 @@ defmodule JetLagServerWeb.GameChannel do
 
     case Games.remove_player_from_game(player_id) do
       {:ok, _} ->
-        # Broadcast to all connected clients that a player has left
-        broadcast!(socket, "player_left", %Structs.PlayerLeftEvent{
-          player_id: player_id
-        })
-
         {:stop, :normal, socket}
 
       _error ->
@@ -73,11 +61,6 @@ defmodule JetLagServerWeb.GameChannel do
 
       case Games.start_game(game) do
         {:ok, updated_game} ->
-          # Broadcast to all connected clients that the game has started
-          broadcast!(socket, "game_started", %Structs.GameStartedEvent{
-            started_at: updated_game.started_at
-          })
-
           {:reply, {:ok, %{started_at: updated_game.started_at}}, socket}
 
         _error ->
