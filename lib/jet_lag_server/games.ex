@@ -7,7 +7,6 @@ defmodule JetLagServer.Games do
   alias JetLagServer.Repo
 
   alias JetLagServer.Games.{Game, Player, GameSettings}
-  alias JetLagServer.Geocoding.CachedBoundary
   alias JetLagServer.Geocoding
 
   @doc """
@@ -32,31 +31,6 @@ defmodule JetLagServer.Games do
   def get_game_by_code(code) do
     Repo.get_by(Game, code: code)
     |> Repo.preload([:settings, :players])
-  end
-
-  @doc """
-  Gets a cached boundary by its OSM type and ID.
-  """
-  def get_cached_boundary(osm_type, osm_id) do
-    Repo.get_by(CachedBoundary, osm_type: osm_type, osm_id: osm_id)
-  end
-
-  @doc """
-  Gets location data for a game.
-  """
-  def get_location_data(game) do
-    case get_cached_boundary(game.osm_type, game.osm_id) do
-      nil ->
-        nil
-
-      cached ->
-        cached_data = Jason.decode!(cached.data)
-
-        struct(
-          Geocoding.Structs.Boundary,
-          Map.new(cached_data, fn {k, v} -> {String.to_atom(k), v} end)
-        )
-    end
   end
 
   @doc """
@@ -117,9 +91,11 @@ defmodule JetLagServer.Games do
   defp get_location_from_id(location_id) when is_binary(location_id) do
     case String.split(location_id, ":") do
       [osm_type, osm_id] ->
-        case get_cached_boundary(osm_type, osm_id) do
-          nil -> {:error, :location_not_found}
-          _cached -> {:ok, %{osm_type: osm_type, osm_id: osm_id}}
+        # Use Geocoding.get_location_boundaries to check if the location exists
+        # This will use the cache if available
+        case Geocoding.get_location_boundaries(osm_type, osm_id) do
+          {:ok, _boundary} -> {:ok, %{osm_type: osm_type, osm_id: osm_id}}
+          {:error, _reason} -> {:error, :location_not_found}
         end
 
       _ ->

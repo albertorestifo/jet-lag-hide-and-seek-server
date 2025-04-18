@@ -90,8 +90,12 @@ defmodule JetLagServer.Games.Structs do
     Converts a Game schema to a Game struct.
     """
     def from_schema(%JetLagServer.Games.Game{} = game) do
-      # Get location data from cached boundary
-      location_data = JetLagServer.Games.get_location_data(game)
+      # Get location data from Geocoding module
+      location_data =
+        case JetLagServer.Geocoding.get_location_boundaries(game.osm_type, game.osm_id) do
+          {:ok, boundary} -> boundary
+          _ -> nil
+        end
 
       # Create a location struct from the boundary data
       location =

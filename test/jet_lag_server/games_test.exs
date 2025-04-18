@@ -3,7 +3,6 @@ defmodule JetLagServer.GamesTest do
 
   alias JetLagServer.Games
   alias JetLagServer.Games.{Game, Player, GameSettings}
-  alias JetLagServer.Geocoding.CachedBoundary
   import JetLagServer.GamesFixtures
 
   describe "games" do
@@ -107,41 +106,7 @@ defmodule JetLagServer.GamesTest do
     end
   end
 
-  describe "cached boundaries" do
-    test "get_cached_boundary/2 returns the cached boundary with given osm_type and osm_id" do
-      cached = cached_boundary_fixture()
-
-      assert %CachedBoundary{} =
-               found_cached = Games.get_cached_boundary(cached.osm_type, cached.osm_id)
-
-      assert found_cached.id == cached.id
-      assert found_cached.osm_type == cached.osm_type
-      assert found_cached.osm_id == cached.osm_id
-    end
-
-    test "get_cached_boundary/2 returns nil when cached boundary does not exist" do
-      assert Games.get_cached_boundary("way", "999999") == nil
-    end
-
-    test "get_location_data/1 returns boundary data for a game" do
-      cached = cached_boundary_fixture()
-      game = %Game{osm_type: cached.osm_type, osm_id: cached.osm_id}
-
-      location_data = Games.get_location_data(game)
-
-      assert location_data != nil
-      assert location_data.name == "Madrid"
-      assert location_data.type == "city"
-      assert location_data.coordinates == [-3.7038, 40.4168]
-      assert location_data.osm_id == cached.osm_id
-      assert location_data.osm_type == cached.osm_type
-    end
-
-    test "get_location_data/1 returns nil when cached boundary does not exist" do
-      game = %Game{osm_type: "way", osm_id: "999999"}
-      assert Games.get_location_data(game) == nil
-    end
-  end
+  # We no longer need to test cached boundaries directly since we're using Geocoding module
 
   describe "game_settings" do
     test "create_game_settings/1 with valid data creates game settings" do
