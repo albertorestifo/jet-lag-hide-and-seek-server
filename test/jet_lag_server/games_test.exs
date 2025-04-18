@@ -45,7 +45,7 @@ defmodule JetLagServer.GamesTest do
 
       assert {:ok, %Game{} = game} = Games.create_game(valid_attrs)
       assert game.code =~ ~r/^[A-Z0-9]{6}$/
-      assert game.status == "waiting"
+      assert game.status == :waiting
       assert game.started_at == nil
       assert game.osm_type == cached.osm_type
       assert game.osm_id == cached.osm_id
@@ -97,11 +97,11 @@ defmodule JetLagServer.GamesTest do
 
     test "start_game/1 updates the game status and sets started_at" do
       game = game_fixture()
-      assert game.status == "waiting"
+      assert game.status == :waiting
       assert game.started_at == nil
 
       assert {:ok, %Game{} = updated_game} = Games.start_game(game)
-      assert updated_game.status == "active"
+      assert updated_game.status == :active
       assert updated_game.started_at != nil
     end
   end

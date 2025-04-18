@@ -39,7 +39,7 @@ defmodule JetLagServerWeb.Schemas.Game do
       status: %Schema{
         type: :string,
         enum: ["waiting", "active", "completed"],
-        description: "Current status of the game",
+        description: "Current status of the game (waiting, active, completed)",
         example: "waiting"
       },
       created_at: %Schema{

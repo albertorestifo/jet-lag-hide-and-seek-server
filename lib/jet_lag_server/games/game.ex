@@ -4,9 +4,13 @@ defmodule JetLagServer.Games.Game do
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
+
+  # Define the game status enum
+  @game_statuses [:waiting, :active, :completed]
+
   schema "games" do
     field :code, :string
-    field :status, :string, default: "waiting"
+    field :status, Ecto.Enum, values: @game_statuses, default: :waiting
     field :started_at, :utc_datetime, default: nil
     field :osm_type, :string
     field :osm_id, :string
@@ -23,7 +27,6 @@ defmodule JetLagServer.Games.Game do
     |> cast(attrs, [:code, :status, :started_at, :osm_type, :osm_id, :settings_id])
     |> validate_required([:code, :status, :osm_type, :osm_id])
     |> validate_format(:code, ~r/^[A-Z0-9]{6}$/)
-    |> validate_inclusion(:status, ["waiting", "active", "completed"])
     |> unique_constraint(:code)
   end
 

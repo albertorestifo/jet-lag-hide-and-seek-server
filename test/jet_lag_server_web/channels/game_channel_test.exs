@@ -58,7 +58,7 @@ defmodule JetLagServerWeb.GameChannelTest do
 
     # Verify the game was started
     updated_game = Games.get_game(game.id)
-    assert updated_game.status == "active"
+    assert updated_game.status == :active
     assert updated_game.started_at != nil
 
     # Verify a game_started broadcast was sent
@@ -84,7 +84,7 @@ defmodule JetLagServerWeb.GameChannelTest do
 
     # Verify the game was not started
     updated_game = Games.get_game(game.id)
-    assert updated_game.status == "waiting"
+    assert updated_game.status == :waiting
     assert updated_game.started_at == nil
   end
 

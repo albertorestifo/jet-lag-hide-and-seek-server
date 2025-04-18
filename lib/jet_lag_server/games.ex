@@ -123,7 +123,7 @@ defmodule JetLagServer.Games do
     result =
       game
       |> Game.changeset(%{
-        status: "active",
+        status: :active,
         started_at: started_at
       })
       |> Repo.update()

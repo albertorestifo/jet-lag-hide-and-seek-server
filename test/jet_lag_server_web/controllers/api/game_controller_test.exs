@@ -98,6 +98,7 @@ defmodule JetLagServerWeb.API.GameControllerTest do
       assert %{"data" => data} = json_response(conn, 200)
       assert data["id"] == game.id
       assert data["code"] == game.code
+      # Status is an atom in the database but serialized as a string in JSON
       assert data["status"] == "waiting"
       # The location name comes from the cached boundary
       assert data["settings"]["units"] == "iso"
@@ -137,6 +138,7 @@ defmodule JetLagServerWeb.API.GameControllerTest do
 
       assert %{"data" => data} = json_response(conn, 200)
       assert data["id"] == game.id
+      # Status is an atom in the database but serialized as a string in JSON
       assert data["status"] == "active"
       assert data["started_at"] != nil
     end
