@@ -1,0 +1,88 @@
+{
+  "features": [
+    {
+      "geometry": { "coordinates": [-3.7035825, 40.4167047], "type": "Point" },
+      "type": "Feature",
+      "properties": {
+        "osm_type": "R",
+        "osm_id": 5326784,
+        "extent": [-3.8889539, 40.6437293, -3.5179163, 40.3119774],
+        "country": "España",
+        "osm_key": "place",
+        "countrycode": "ES",
+        "osm_value": "city",
+        "name": "Madrid",
+        "state": "Comunidad de Madrid",
+        "type": "city"
+      }
+    },
+    {
+      "geometry": {
+        "coordinates": [-3.771562775451811, 40.5248319],
+        "type": "Point"
+      },
+      "type": "Feature",
+      "properties": {
+        "osm_type": "R",
+        "osm_id": 349055,
+        "extent": [-4.5790058, 41.1657381, -3.0529852, 39.8846264],
+        "country": "España",
+        "osm_key": "place",
+        "countrycode": "ES",
+        "osm_value": "state",
+        "name": "Comunidad de Madrid",
+        "type": "state"
+      }
+    },
+    {
+      "geometry": { "coordinates": [-3.8758396, 40.4933095], "type": "Point" },
+      "type": "Feature",
+      "properties": {
+        "osm_type": "R",
+        "osm_id": 343285,
+        "extent": [-3.9498884, 40.5746026, -3.8331637, 40.4750246],
+        "country": "España",
+        "osm_key": "place",
+        "countrycode": "ES",
+        "osm_value": "town",
+        "name": "Las Rozas de Madrid",
+        "state": "Comunidad de Madrid",
+        "type": "city"
+      }
+    },
+    {
+      "geometry": { "coordinates": [-3.8270997, 40.2508847], "type": "Point" },
+      "type": "Feature",
+      "properties": {
+        "osm_type": "R",
+        "osm_id": 346079,
+        "extent": [-3.8533945, 40.2774525, -3.7963871, 40.2270838],
+        "country": "España",
+        "osm_key": "place",
+        "countrycode": "ES",
+        "osm_value": "town",
+        "name": "Humanes de Madrid",
+        "state": "Comunidad de Madrid",
+        "type": "city"
+      }
+    },
+    {
+      "geometry": { "coordinates": [-93.8232813, 41.8766526], "type": "Point" },
+      "type": "Feature",
+      "properties": {
+        "osm_type": "R",
+        "osm_id": 128521,
+        "extent": [-93.8373247, 41.8852565, -93.8093703, 41.8671252],
+        "country": "United States",
+        "osm_key": "place",
+        "countrycode": "US",
+        "osm_value": "town",
+        "name": "Madrid",
+        "county": "Boone",
+        "state": "Iowa",
+        "type": "city"
+      }
+    }
+  ],
+  "type": "FeatureCollection"
+}

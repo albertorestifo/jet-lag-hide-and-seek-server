@@ -13,7 +13,8 @@ defmodule JetLagServer.Geocoding.Structs.Boundary do
           boundaries: map() | nil
         }
 
-  @derive {Jason.Encoder, only: [:name, :type, :osm_id, :osm_type, :bounding_box, :coordinates, :boundaries]}
+  @derive {Jason.Encoder,
+           only: [:name, :type, :osm_id, :osm_type, :bounding_box, :coordinates, :boundaries]}
   defstruct [
     :name,
     :type,
@@ -32,17 +33,40 @@ defmodule JetLagServer.Geocoding.Structs.Boundary do
     # Extract the relevant information
     name = get_in(data, ["localname"])
     type = get_location_type(data)
-    
+
     # Get the bounding box
-    bounding_box = get_in(data, ["boundingbox"])
-    |> parse_bounding_box()
-    
+    bounding_box =
+      case get_in(data, ["boundingbox"]) do
+        nil ->
+          # If boundingbox is not available, try to extract from extratags
+          extratags = get_in(data, ["extratags"]) || %{}
+          bbox_str = Map.get(extratags, "bbox")
+
+          if bbox_str do
+            [south, west, north, east] = String.split(bbox_str, ",")
+
+            [
+              String.to_float(west),
+              String.to_float(south),
+              String.to_float(east),
+              String.to_float(north)
+            ]
+          else
+            # No default - return nil if no bounding box is available
+            nil
+          end
+
+        boundingbox ->
+          parse_bounding_box(boundingbox)
+      end
+
     # Get the GeoJSON for the boundaries
     boundaries = get_in(data, ["geometry"])
-    
+
     # Get the centroid coordinates
+    # No default - return nil if no centroid is available
     centroid = get_centroid(data)
-    
+
     %__MODULE__{
       name: name,
       type: type,
@@ -56,6 +80,7 @@ defmodule JetLagServer.Geocoding.Structs.Boundary do
 
   # Parse the bounding box from the API response
   defp parse_bounding_box(nil), do: nil
+
   defp parse_bounding_box([south, north, west, east]) do
     [
       String.to_float(west),
@@ -64,7 +89,7 @@ defmodule JetLagServer.Geocoding.Structs.Boundary do
       String.to_float(north)
     ]
   end
-  
+
   # Get the centroid coordinates from the API response
   defp get_centroid(data) do
     case get_in(data, ["centroid", "coordinates"]) do
@@ -72,18 +97,22 @@ defmodule JetLagServer.Geocoding.Structs.Boundary do
       _ -> nil
     end
   end
-  
+
   # Determine the location type from the API response
   defp get_location_type(data) do
     address = get_in(data, ["address"]) || %{}
-    
+
     cond do
-      Map.has_key?(address, "country") && !Map.has_key?(address, "state") && !Map.has_key?(address, "city") ->
+      Map.has_key?(address, "country") && !Map.has_key?(address, "state") &&
+          !Map.has_key?(address, "city") ->
         "country"
+
       Map.has_key?(address, "state") && !Map.has_key?(address, "city") ->
         "state"
+
       Map.has_key?(address, "city") ->
         "city"
+
       true ->
         "other"
     end
