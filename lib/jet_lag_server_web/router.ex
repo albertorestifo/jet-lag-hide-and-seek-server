@@ -27,7 +27,13 @@ defmodule JetLagServerWeb.Router do
   scope "/api" do
     pipe_through :api
 
+    # Dynamic OpenAPI spec generation
     get "/openapi", OpenApiSpex.Plug.RenderSpec, []
+
+    # Static OpenAPI spec (generated with mix openapi.gen.json)
+    # Uncomment this and comment out the line above to use the static file
+    # get "/openapi", Plug.Static, at: "/", from: :jet_lag_server, only: ["openapi.json"]
+
     get "/swaggerui", OpenApiSpex.Plug.SwaggerUI, path: "/api/openapi"
   end
 

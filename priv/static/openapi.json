@@ -1,0 +1,709 @@
+{
+  "components": {
+    "responses": {},
+    "schemas": {
+      "CheckGameExistsResponse": {
+        "description": "Response after checking if a game exists",
+        "properties": {
+          "exists": {
+            "description": "Whether the game exists",
+            "example": true,
+            "type": "boolean"
+          },
+          "game_id": {
+            "description": "ID of the game if it exists",
+            "example": "game-123",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "exists"
+        ],
+        "title": "CheckGameExistsResponse",
+        "type": "object"
+      },
+      "CreateGameRequest": {
+        "description": "Request to create a new game",
+        "properties": {
+          "creator": {
+            "properties": {
+              "name": {
+                "description": "Name of the player creating the game",
+                "example": "John Doe",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name"
+            ],
+            "type": "object"
+          },
+          "location": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Location"
+              }
+            ],
+            "description": "Location of the game"
+          },
+          "settings": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GameSettings"
+              }
+            ],
+            "description": "Settings for the game"
+          }
+        },
+        "required": [
+          "location",
+          "settings",
+          "creator"
+        ],
+        "title": "CreateGameRequest",
+        "type": "object"
+      },
+      "CreateGameResponse": {
+        "description": "Response after creating a game",
+        "properties": {
+          "game_code": {
+            "description": "Short code for joining the game",
+            "example": "ABC123",
+            "type": "string"
+          },
+          "game_id": {
+            "description": "Unique identifier for the created game",
+            "example": "game-123",
+            "type": "string"
+          },
+          "websocket_url": {
+            "description": "WebSocket URL for real-time updates",
+            "example": "wss://api.jetlag.example.com/ws/games/game-123",
+            "type": "string"
+          }
+        },
+        "required": [
+          "game_id",
+          "game_code",
+          "websocket_url"
+        ],
+        "title": "CreateGameResponse",
+        "type": "object"
+      },
+      "Error": {
+        "description": "Error response",
+        "properties": {
+          "code": {
+            "description": "Error code",
+            "example": "invalid_request",
+            "type": "string"
+          },
+          "details": {
+            "description": "Additional error details",
+            "nullable": true,
+            "type": "object"
+          },
+          "message": {
+            "description": "Error message",
+            "example": "Invalid game code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "Error",
+        "type": "object"
+      },
+      "Game": {
+        "description": "A hide and seek game",
+        "properties": {
+          "code": {
+            "description": "Short code for joining the game",
+            "example": "ABC123",
+            "pattern": "^[A-Z0-9]{6}$",
+            "type": "string"
+          },
+          "created_at": {
+            "description": "When the game was created",
+            "example": "2023-06-15T14:30:00Z",
+            "format": "date_time",
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier for the game",
+            "example": "game-123",
+            "type": "string"
+          },
+          "location": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Location"
+              }
+            ],
+            "description": "Location of the game"
+          },
+          "players": {
+            "description": "Players in the game",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Player"
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "settings": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GameSettings"
+              }
+            ],
+            "description": "Settings for the game"
+          },
+          "started_at": {
+            "description": "When the game was started",
+            "format": "date_time",
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "description": "Current status of the game",
+            "enum": [
+              "waiting",
+              "active",
+              "completed"
+            ],
+            "example": "waiting",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "location",
+          "settings",
+          "players",
+          "status"
+        ],
+        "title": "Game",
+        "type": "object"
+      },
+      "GameSettings": {
+        "description": "Settings for a game",
+        "properties": {
+          "day_end_time": {
+            "description": "Daily end time in HH:MM format",
+            "example": "18:00",
+            "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$",
+            "type": "string"
+          },
+          "day_start_time": {
+            "description": "Daily start time in HH:MM format",
+            "example": "09:00",
+            "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$",
+            "type": "string"
+          },
+          "game_duration": {
+            "description": "Duration of the game in days",
+            "example": 1,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "hiding_zone_size": {
+            "description": "Size of hiding zones in meters",
+            "example": 500,
+            "maximum": 2000,
+            "minimum": 100,
+            "type": "integer"
+          },
+          "hiding_zones": {
+            "description": "Types of locations where players can hide",
+            "example": [
+              "bus_stops",
+              "local_trains"
+            ],
+            "items": {
+              "enum": [
+                "bus_stops",
+                "local_trains",
+                "regional_trains",
+                "high_speed_trains",
+                "subways",
+                "tram"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "units": {
+            "description": "Unit system to use",
+            "enum": [
+              "ansi",
+              "iso"
+            ],
+            "example": "iso",
+            "type": "string"
+          }
+        },
+        "required": [
+          "units",
+          "hiding_zones",
+          "hiding_zone_size",
+          "game_duration",
+          "day_start_time",
+          "day_end_time"
+        ],
+        "title": "GameSettings",
+        "type": "object"
+      },
+      "JoinGameRequest": {
+        "description": "Request to join an existing game",
+        "properties": {
+          "game_code": {
+            "description": "Code for the game to join",
+            "example": "ABC123",
+            "type": "string"
+          },
+          "player_name": {
+            "description": "Name of the player joining",
+            "example": "Jane Smith",
+            "type": "string"
+          }
+        },
+        "required": [
+          "game_code",
+          "player_name"
+        ],
+        "title": "JoinGameRequest",
+        "type": "object"
+      },
+      "JoinGameResponse": {
+        "description": "Response after joining a game",
+        "properties": {
+          "game": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Game"
+              }
+            ],
+            "description": "The game that was joined"
+          },
+          "game_id": {
+            "description": "ID of the joined game",
+            "example": "game-123",
+            "type": "string"
+          },
+          "player_id": {
+            "description": "ID assigned to the player",
+            "example": "player-456",
+            "type": "string"
+          },
+          "websocket_url": {
+            "description": "WebSocket URL for real-time updates",
+            "example": "wss://api.jetlag.example.com/ws/games/game-123",
+            "type": "string"
+          }
+        },
+        "required": [
+          "game_id",
+          "player_id",
+          "websocket_url",
+          "game"
+        ],
+        "title": "JoinGameResponse",
+        "type": "object"
+      },
+      "Location": {
+        "description": "A location in the game",
+        "properties": {
+          "bounding_box": {
+            "description": "Bounding box coordinates [minLon, minLat, maxLon, maxLat]",
+            "example": [
+              -3.8,
+              40.3,
+              -3.6,
+              40.5
+            ],
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 4,
+            "minItems": 4,
+            "type": "array"
+          },
+          "coordinates": {
+            "description": "Longitude and latitude coordinates",
+            "example": [
+              -3.7038,
+              40.4168
+            ],
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          },
+          "name": {
+            "description": "Name of the location",
+            "example": "Madrid",
+            "type": "string"
+          },
+          "osm_id": {
+            "description": "OpenStreetMap ID",
+            "example": "12345678",
+            "type": "string"
+          },
+          "osm_type": {
+            "description": "OpenStreetMap element type",
+            "example": "way",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type of location (city, region, country)",
+            "example": "City",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "coordinates"
+        ],
+        "title": "Location",
+        "type": "object"
+      },
+      "Player": {
+        "description": "A player in the game",
+        "properties": {
+          "id": {
+            "description": "Unique identifier for the player",
+            "example": "player-123",
+            "type": "string"
+          },
+          "is_creator": {
+            "default": false,
+            "description": "Whether this player created the game",
+            "example": true,
+            "type": "boolean"
+          },
+          "name": {
+            "description": "Player's name",
+            "example": "John Doe",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "Player",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "API for the JetLag Hide & Seek game companion app",
+    "title": "JetLag Hide & Seek Game API",
+    "version": "1.0.0"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/games": {
+      "post": {
+        "callbacks": {},
+        "description": "Creates a new game with the specified settings",
+        "operationId": "JetLagServerWeb.API.GameController.create",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGameRequest"
+              }
+            }
+          },
+          "description": "Game creation parameters",
+          "required": false
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateGameResponse"
+                }
+              }
+            },
+            "description": "Game created successfully"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Server error"
+          }
+        },
+        "summary": "Create a new game",
+        "tags": [
+          "games"
+        ]
+      }
+    },
+    "/api/games/check/{code}": {
+      "get": {
+        "callbacks": {},
+        "description": "Checks if a game with the given code exists",
+        "operationId": "JetLagServerWeb.API.GameController.check_game_exists",
+        "parameters": [
+          {
+            "description": "Game code",
+            "example": "ABC123",
+            "in": "path",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckGameExistsResponse"
+                }
+              }
+            },
+            "description": "Game existence check successful"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Server error"
+          }
+        },
+        "summary": "Check if a game exists",
+        "tags": [
+          "games"
+        ]
+      }
+    },
+    "/api/games/join": {
+      "post": {
+        "callbacks": {},
+        "description": "Allows a player to join an existing game using a game code",
+        "operationId": "JetLagServerWeb.API.GameController.join",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JoinGameRequest"
+              }
+            }
+          },
+          "description": "Game join parameters",
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JoinGameResponse"
+                }
+              }
+            },
+            "description": "Successfully joined the game"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid request or game code"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Game not found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Server error"
+          }
+        },
+        "summary": "Join a game",
+        "tags": [
+          "games"
+        ]
+      }
+    },
+    "/api/games/{id}": {
+      "get": {
+        "callbacks": {},
+        "description": "Retrieves details about a specific game",
+        "operationId": "JetLagServerWeb.API.GameController.show",
+        "parameters": [
+          {
+            "description": "Game ID",
+            "example": "game-123",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Game"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Game details retrieved successfully"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Game not found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Server error"
+          }
+        },
+        "summary": "Get game details",
+        "tags": [
+          "games"
+        ]
+      }
+    },
+    "/api/games/{id}/start": {
+      "post": {
+        "callbacks": {},
+        "description": "Starts a game, preventing new players from joining",
+        "operationId": "JetLagServerWeb.API.GameController.start",
+        "parameters": [
+          {
+            "description": "Game ID",
+            "example": "game-123",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Game"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Game started successfully"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Game not found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Server error"
+          }
+        },
+        "summary": "Start a game",
+        "tags": [
+          "games"
+        ]
+      }
+    }
+  },
+  "security": [],
+  "servers": [
+    {
+      "url": "http://localhost:4000",
+      "variables": {}
+    }
+  ],
+  "tags": []
+}

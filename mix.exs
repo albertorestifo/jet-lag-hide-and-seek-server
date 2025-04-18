@@ -79,6 +79,7 @@ defmodule JetLagServer.MixProject do
       "assets.deploy": [
         "tailwind jet_lag_server --minify",
         "esbuild jet_lag_server --minify",
+        "openapi.gen.json",
         "phx.digest"
       ]
     ]
