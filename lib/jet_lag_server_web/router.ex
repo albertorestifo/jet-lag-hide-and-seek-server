@@ -46,6 +46,10 @@ defmodule JetLagServerWeb.Router do
     post "/games/:id/start", GameController, :start
     post "/games/join", GameController, :join
     get "/games/check/:code", GameController, :check_game_exists
+
+    # Geocoding endpoints
+    get "/geocoding/autocomplete", GeocodingController, :autocomplete
+    get "/geocoding/boundaries/:id", GeocodingController, :boundaries
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

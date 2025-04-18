@@ -34,7 +34,9 @@ defmodule JetLagServerWeb.ApiSpec do
           CreateGameResponse: JetLagServerWeb.Schemas.CreateGameResponse,
           JoinGameRequest: JetLagServerWeb.Schemas.JoinGameRequest,
           JoinGameResponse: JetLagServerWeb.Schemas.JoinGameResponse,
-          CheckGameExistsResponse: JetLagServerWeb.Schemas.CheckGameExistsResponse
+          CheckGameExistsResponse: JetLagServerWeb.Schemas.CheckGameExistsResponse,
+          LocationSearchResult: JetLagServerWeb.Schemas.LocationSearchResult,
+          LocationBoundaries: JetLagServerWeb.Schemas.LocationBoundaries
         }
       }
     }

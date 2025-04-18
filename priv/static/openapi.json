@@ -376,6 +376,137 @@
         "title": "Location",
         "type": "object"
       },
+      "LocationBoundaries": {
+        "description": "Boundaries of a location",
+        "properties": {
+          "boundaries": {
+            "additionalProperties": true,
+            "description": "GeoJSON representation of the boundaries",
+            "type": "object"
+          },
+          "bounding_box": {
+            "description": "Bounding box coordinates [minLon, minLat, maxLon, maxLat]",
+            "example": [
+              -3.8,
+              40.3,
+              -3.6,
+              40.5
+            ],
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 4,
+            "minItems": 4,
+            "type": "array"
+          },
+          "coordinates": {
+            "description": "Centroid coordinates [longitude, latitude]",
+            "example": [
+              -3.7038,
+              40.4168
+            ],
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          },
+          "name": {
+            "description": "Name of the location",
+            "example": "Madrid",
+            "type": "string"
+          },
+          "osm_id": {
+            "description": "OpenStreetMap ID",
+            "example": "123456",
+            "type": "string"
+          },
+          "osm_type": {
+            "description": "OpenStreetMap element type",
+            "example": "way",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type of location",
+            "enum": [
+              "country",
+              "state",
+              "city",
+              "other"
+            ],
+            "example": "city",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "osm_id",
+          "osm_type"
+        ],
+        "title": "LocationBoundaries",
+        "type": "object"
+      },
+      "LocationSearchResult": {
+        "description": "A location search result",
+        "properties": {
+          "coordinates": {
+            "description": "Longitude and latitude coordinates",
+            "example": [
+              -3.7038,
+              40.4168
+            ],
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          },
+          "id": {
+            "description": "Unique identifier for the location (format: osm_type:osm_id)",
+            "example": "way:123456",
+            "type": "string"
+          },
+          "osm_id": {
+            "description": "OpenStreetMap ID",
+            "example": "123456",
+            "type": "string"
+          },
+          "osm_type": {
+            "description": "OpenStreetMap element type",
+            "example": "way",
+            "type": "string"
+          },
+          "subtitle": {
+            "description": "Type of location (Country, State, City)",
+            "example": "City",
+            "type": "string"
+          },
+          "title": {
+            "description": "Name of the location",
+            "example": "Madrid",
+            "type": "string"
+          },
+          "type": {
+            "description": "Location type",
+            "enum": [
+              "country",
+              "state",
+              "city"
+            ],
+            "example": "city",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "subtitle"
+        ],
+        "title": "LocationSearchResult",
+        "type": "object"
+      },
       "Player": {
         "description": "A player in the game",
         "properties": {
@@ -694,6 +825,159 @@
         "summary": "Start a game",
         "tags": [
           "games"
+        ]
+      }
+    },
+    "/api/geocoding/autocomplete": {
+      "get": {
+        "callbacks": {},
+        "description": "Returns a list of locations matching the search query",
+        "operationId": "JetLagServerWeb.API.GeocodingController.autocomplete",
+        "parameters": [
+          {
+            "description": "Search query",
+            "example": "Madrid",
+            "in": "query",
+            "name": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Maximum number of results to return",
+            "example": 10,
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Language for results",
+            "example": "en",
+            "in": "query",
+            "name": "lang",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "$ref": "#/components/schemas/LocationSearchResult"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Location search results"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Server error"
+          }
+        },
+        "summary": "Search for locations",
+        "tags": [
+          "geocoding"
+        ]
+      }
+    },
+    "/api/geocoding/boundaries/{id}": {
+      "get": {
+        "callbacks": {},
+        "description": "Returns the boundaries of a location by its ID",
+        "operationId": "JetLagServerWeb.API.GeocodingController.boundaries",
+        "parameters": [
+          {
+            "description": "Location ID (format: osm_type:osm_id)",
+            "example": "way:123456",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/LocationBoundaries"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Location boundaries"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid request"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Location not found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Server error"
+          }
+        },
+        "summary": "Get location boundaries",
+        "tags": [
+          "geocoding"
         ]
       }
     }
