@@ -8,19 +8,16 @@ defmodule JetLagServer.Geocoding.Structs.Boundary do
           type: String.t(),
           osm_id: String.t(),
           osm_type: String.t(),
-          bounding_box: [float()] | nil,
           coordinates: [float()] | nil,
           boundaries: map() | nil
         }
 
-  @derive {Jason.Encoder,
-           only: [:name, :type, :osm_id, :osm_type, :bounding_box, :coordinates, :boundaries]}
+  @derive {Jason.Encoder, only: [:name, :type, :osm_id, :osm_type, :coordinates, :boundaries]}
   defstruct [
     :name,
     :type,
     :osm_id,
     :osm_type,
-    :bounding_box,
     :coordinates,
     :boundaries
   ]
@@ -34,31 +31,7 @@ defmodule JetLagServer.Geocoding.Structs.Boundary do
     name = get_in(data, ["localname"])
     type = get_location_type(data)
 
-    # Get the bounding box
-    bounding_box =
-      case get_in(data, ["boundingbox"]) do
-        nil ->
-          # If boundingbox is not available, try to extract from extratags
-          extratags = get_in(data, ["extratags"]) || %{}
-          bbox_str = Map.get(extratags, "bbox")
-
-          if bbox_str do
-            [south, west, north, east] = String.split(bbox_str, ",")
-
-            [
-              String.to_float(west),
-              String.to_float(south),
-              String.to_float(east),
-              String.to_float(north)
-            ]
-          else
-            # No default - return nil if no bounding box is available
-            nil
-          end
-
-        boundingbox ->
-          parse_bounding_box(boundingbox)
-      end
+    # We no longer need to parse the bounding box
 
     # Get the GeoJSON for the boundaries
     boundaries = get_in(data, ["geometry"])
@@ -72,23 +45,12 @@ defmodule JetLagServer.Geocoding.Structs.Boundary do
       type: type,
       osm_id: osm_id,
       osm_type: osm_type,
-      bounding_box: bounding_box,
       coordinates: centroid,
       boundaries: boundaries
     }
   end
 
-  # Parse the bounding box from the API response
-  defp parse_bounding_box(nil), do: nil
-
-  defp parse_bounding_box([south, north, west, east]) do
-    [
-      String.to_float(west),
-      String.to_float(south),
-      String.to_float(east),
-      String.to_float(north)
-    ]
-  end
+  # We no longer need to parse the bounding box
 
   # Get the centroid coordinates from the API response
   defp get_centroid(data) do

@@ -32,14 +32,6 @@ defmodule JetLagServerWeb.Schemas.LocationBoundaries do
         description: "OpenStreetMap element type",
         example: "way"
       },
-      bounding_box: %Schema{
-        type: :array,
-        description: "Bounding box coordinates [minLon, minLat, maxLon, maxLat]",
-        items: %Schema{type: :number},
-        minItems: 4,
-        maxItems: 4,
-        example: [-3.8, 40.3, -3.6, 40.5]
-      },
       coordinates: %Schema{
         type: :array,
         description: "Centroid coordinates [longitude, latitude]",

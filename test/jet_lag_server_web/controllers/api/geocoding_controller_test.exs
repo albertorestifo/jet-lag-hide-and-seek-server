@@ -73,7 +73,8 @@ defmodule JetLagServerWeb.API.GeocodingControllerTest do
         assert Map.has_key?(data, "type")
         assert Map.has_key?(data, "osm_id")
         assert Map.has_key?(data, "osm_type")
-        assert Map.has_key?(data, "bounding_box")
+        # bounding_box is no longer included in the API response
+        refute Map.has_key?(data, "bounding_box")
         assert Map.has_key?(data, "coordinates")
         assert Map.has_key?(data, "boundaries")
 

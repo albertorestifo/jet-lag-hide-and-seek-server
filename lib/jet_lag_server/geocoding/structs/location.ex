@@ -67,6 +67,9 @@ defmodule JetLagServer.Geocoding.Structs.Location do
       Map.get(properties, "osm_value") == "town" ->
         "city"
 
+      Map.get(properties, "osm_value") == "state" ->
+        "state"
+
       Map.get(properties, "osm_key") == "place" && Map.get(properties, "osm_value") == "village" ->
         "city"
 

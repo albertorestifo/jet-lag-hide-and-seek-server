@@ -56,11 +56,7 @@ defmodule JetLagServer.Geocoding.OpenStreetMapTest do
           assert length(boundary.coordinates) == 2
         end
 
-        # If bounding_box is present, check its format
-        if boundary.bounding_box do
-          assert is_list(boundary.bounding_box)
-          assert length(boundary.bounding_box) == 4
-        end
+        # We no longer check for bounding_box as it's been removed
       end
     end
 
