@@ -18,7 +18,11 @@ defmodule JetLagServerWeb.API.GeocodingControllerTest do
       ]
 
       with_mock JetLagServer.Geocoding.Photon,
-        search: fn _query, _opts -> {:ok, mock_locations} end do
+        search: fn _query, opts ->
+          # Verify that the layers option is being passed
+          assert Keyword.get(opts, :layers) == ["country", "state", "city"]
+          {:ok, mock_locations}
+        end do
         conn = get(conn, ~p"/api/geocoding/autocomplete?query=Madrid")
         assert %{"data" => data} = json_response(conn, 200)
         assert length(data) == 1
@@ -28,7 +32,11 @@ defmodule JetLagServerWeb.API.GeocodingControllerTest do
 
     test "returns error when search fails", %{conn: conn} do
       with_mock JetLagServer.Geocoding.Photon,
-        search: fn _query, _opts -> {:error, "API error"} end do
+        search: fn _query, opts ->
+          # Verify that the layers option is being passed
+          assert Keyword.get(opts, :layers) == ["country", "state", "city"]
+          {:error, "API error"}
+        end do
         conn = get(conn, ~p"/api/geocoding/autocomplete?query=Madrid")
         assert %{"error" => %{"code" => "search_failed"}} = json_response(conn, 500)
       end

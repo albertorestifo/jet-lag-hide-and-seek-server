@@ -12,9 +12,17 @@ defmodule JetLagServer.Geocoding do
 
   Returns a list of Location structs with title, subtitle, and ID.
   Only returns countries, regions/states, and cities.
+
+  ## Options
+
+  * `:limit` - Maximum number of results to return (default: 10)
+  * `:lang` - Language for results (default: "en")
+  * `:layers` - List of location types to include (default: ["country", "state", "city"])
   """
   @spec search_locations(String.t(), Keyword.t()) :: {:ok, [Location.t()]} | {:error, String.t()}
   def search_locations(query, opts \\ []) do
+    # Ensure layers are always set to our default if not provided
+    opts = Keyword.put_new(opts, :layers, ["country", "state", "city"])
     Photon.search(query, opts)
   end
 

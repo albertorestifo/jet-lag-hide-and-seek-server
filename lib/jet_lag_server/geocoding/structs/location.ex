@@ -32,12 +32,12 @@ defmodule JetLagServer.Geocoding.Structs.Location do
     properties = Map.get(feature, "properties", %{})
     geometry = Map.get(feature, "geometry", %{})
     coordinates = Map.get(geometry, "coordinates", [0, 0])
-    
+
     type = get_location_type(properties)
     name = get_location_name(properties, type)
     osm_id = Map.get(properties, "osm_id")
     osm_type = Map.get(properties, "osm_type")
-    
+
     %__MODULE__{
       id: "#{osm_type}:#{osm_id}",
       title: name,
@@ -51,31 +51,44 @@ defmodule JetLagServer.Geocoding.Structs.Location do
 
   # Determine the location type from properties
   defp get_location_type(properties) do
+    osm_value = Map.get(properties, "osm_value")
+    osm_key = Map.get(properties, "osm_key")
+
     cond do
-      Map.get(properties, "country") != nil && Map.get(properties, "city") == nil && Map.get(properties, "state") == nil ->
+      # Check for country
+      osm_value == "country" ||
+          (Map.get(properties, "country") != nil && Map.get(properties, "city") == nil &&
+             Map.get(properties, "state") == nil) ->
         "country"
-      Map.get(properties, "state") != nil && Map.get(properties, "city") == nil ->
+
+      # Check for state/region
+      osm_value == "state" || osm_value == "region" ||
+          (Map.get(properties, "state") != nil && Map.get(properties, "city") == nil) ->
         "state"
-      Map.get(properties, "city") != nil ->
+
+      # Check for city
+      osm_value == "city" || osm_value == "town" || osm_key == "place" ||
+          Map.get(properties, "city") != nil ->
         "city"
+
       true ->
         "other"
     end
   end
-  
+
   # Get the appropriate name for the location based on its type
   defp get_location_name(properties, "country") do
     Map.get(properties, "country")
   end
-  
+
   defp get_location_name(properties, "state") do
     Map.get(properties, "state")
   end
-  
+
   defp get_location_name(properties, "city") do
     Map.get(properties, "city")
   end
-  
+
   defp get_location_name(properties, _) do
     Map.get(properties, "name")
   end
