@@ -11,9 +11,10 @@ defmodule Mix.Tasks.Openapi.Gen.JsonTest do
   end
 
   test "generates OpenAPI JSON file" do
-    output = capture_io(fn ->
-      Mix.Tasks.Openapi.Gen.Json.run(["-o", @output_path])
-    end)
+    output =
+      capture_io(fn ->
+        Mix.Tasks.Openapi.Gen.Json.run(["-o", @output_path])
+      end)
 
     assert output =~ "Generated OpenAPI specification at #{@output_path}"
     assert File.exists?(@output_path)

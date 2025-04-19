@@ -7,7 +7,7 @@ defmodule JetLagServer.Games.Player do
   schema "players" do
     field :name, :string
     field :is_creator, :boolean, default: false
-    
+
     belongs_to :game, JetLagServer.Games.Game, type: :binary_id
 
     timestamps()

@@ -7,7 +7,7 @@ defmodule JetLagServer.Geocoding.Structs.LocationTest do
     test "parses country correctly" do
       feature = %{
         "properties" => %{
-          "osm_id" => 123456,
+          "osm_id" => 123_456,
           "osm_type" => "relation",
           "osm_value" => "country",
           "name" => "Spain",
@@ -19,7 +19,7 @@ defmodule JetLagServer.Geocoding.Structs.LocationTest do
       }
 
       location = Location.from_photon_feature(feature)
-      
+
       assert location.id == "relation:123456"
       assert location.title == "Spain"
       assert location.subtitle == "Country"
@@ -30,7 +30,7 @@ defmodule JetLagServer.Geocoding.Structs.LocationTest do
     test "parses state correctly" do
       feature = %{
         "properties" => %{
-          "osm_id" => 123456,
+          "osm_id" => 123_456,
           "osm_type" => "relation",
           "osm_value" => "state",
           "name" => "California",
@@ -43,7 +43,7 @@ defmodule JetLagServer.Geocoding.Structs.LocationTest do
       }
 
       location = Location.from_photon_feature(feature)
-      
+
       assert location.id == "relation:123456"
       assert location.title == "California"
       assert location.subtitle == "State"
@@ -54,7 +54,7 @@ defmodule JetLagServer.Geocoding.Structs.LocationTest do
     test "parses city correctly" do
       feature = %{
         "properties" => %{
-          "osm_id" => 123456,
+          "osm_id" => 123_456,
           "osm_type" => "way",
           "osm_value" => "city",
           "name" => "Madrid",
@@ -68,7 +68,7 @@ defmodule JetLagServer.Geocoding.Structs.LocationTest do
       }
 
       location = Location.from_photon_feature(feature)
-      
+
       assert location.id == "way:123456"
       assert location.title == "Madrid"
       assert location.subtitle == "City"
@@ -79,7 +79,7 @@ defmodule JetLagServer.Geocoding.Structs.LocationTest do
     test "parses town as city" do
       feature = %{
         "properties" => %{
-          "osm_id" => 123456,
+          "osm_id" => 123_456,
           "osm_type" => "way",
           "osm_value" => "town",
           "name" => "Alcalá de Henares",
@@ -91,7 +91,7 @@ defmodule JetLagServer.Geocoding.Structs.LocationTest do
       }
 
       location = Location.from_photon_feature(feature)
-      
+
       assert location.id == "way:123456"
       assert location.title == "Alcalá de Henares"
       assert location.subtitle == "City"
@@ -102,7 +102,7 @@ defmodule JetLagServer.Geocoding.Structs.LocationTest do
     test "parses place as city" do
       feature = %{
         "properties" => %{
-          "osm_id" => 123456,
+          "osm_id" => 123_456,
           "osm_type" => "way",
           "osm_key" => "place",
           "osm_value" => "village",
@@ -115,7 +115,7 @@ defmodule JetLagServer.Geocoding.Structs.LocationTest do
       }
 
       location = Location.from_photon_feature(feature)
-      
+
       assert location.id == "way:123456"
       assert location.title == "Small Village"
       assert location.subtitle == "City"
@@ -126,7 +126,7 @@ defmodule JetLagServer.Geocoding.Structs.LocationTest do
     test "handles missing geometry" do
       feature = %{
         "properties" => %{
-          "osm_id" => 123456,
+          "osm_id" => 123_456,
           "osm_type" => "way",
           "osm_value" => "city",
           "name" => "Madrid",
@@ -135,7 +135,7 @@ defmodule JetLagServer.Geocoding.Structs.LocationTest do
       }
 
       location = Location.from_photon_feature(feature)
-      
+
       assert location.id == "way:123456"
       assert location.title == "Madrid"
       assert location.subtitle == "City"
@@ -150,7 +150,7 @@ defmodule JetLagServer.Geocoding.Structs.LocationTest do
       }
 
       location = Location.from_photon_feature(feature)
-      
+
       assert location.id == "nil:nil"
       assert location.title == nil
       assert location.subtitle == "Other"
