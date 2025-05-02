@@ -47,6 +47,31 @@ defmodule JetLagServer.Games.Structs do
     end
   end
 
+  defmodule PlayerLocation do
+    @moduledoc """
+    Struct representing a player's location.
+    """
+    @derive {Jason.Encoder, except: []}
+    defstruct [
+      :latitude,
+      :longitude,
+      :precision,
+      :updated_at
+    ]
+
+    @doc """
+    Converts a PlayerLocation schema to a PlayerLocation struct.
+    """
+    def from_schema(%JetLagServer.Games.PlayerLocation{} = location) do
+      %__MODULE__{
+        latitude: location.latitude,
+        longitude: location.longitude,
+        precision: location.precision,
+        updated_at: location.updated_at
+      }
+    end
+  end
+
   defmodule Player do
     @moduledoc """
     Struct representing a player in the game.
@@ -55,17 +80,25 @@ defmodule JetLagServer.Games.Structs do
     defstruct [
       :id,
       :name,
-      :is_creator
+      :is_creator,
+      :location
     ]
 
     @doc """
     Converts a Player schema to a Player struct.
     """
     def from_schema(%JetLagServer.Games.Player{} = player) do
+      location =
+        case player.location do
+          %JetLagServer.Games.PlayerLocation{} = loc -> PlayerLocation.from_schema(loc)
+          _ -> nil
+        end
+
       %__MODULE__{
         id: player.id,
         name: player.name,
-        is_creator: player.is_creator
+        is_creator: player.is_creator,
+        location: location
       }
     end
   end
@@ -222,5 +255,18 @@ defmodule JetLagServer.Games.Structs do
     """
     @derive {Jason.Encoder, except: []}
     defstruct []
+  end
+
+  defmodule PlayerLocationUpdateEvent do
+    @moduledoc """
+    Struct representing a player location update event.
+    """
+    @derive {Jason.Encoder, except: []}
+    defstruct [
+      :player_id,
+      :latitude,
+      :longitude,
+      :precision
+    ]
   end
 end

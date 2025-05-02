@@ -512,6 +512,15 @@
             "example": true,
             "type": "boolean"
           },
+          "location": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PlayerLocation"
+              }
+            ],
+            "description": "Player's current location",
+            "nullable": true
+          },
           "name": {
             "description": "Player's name",
             "example": "John Doe",
@@ -523,6 +532,48 @@
           "name"
         ],
         "title": "Player",
+        "type": "object"
+      },
+      "PlayerLocation": {
+        "description": "A player's location",
+        "properties": {
+          "latitude": {
+            "description": "Latitude coordinate",
+            "example": 40.4168,
+            "format": "float",
+            "maximum": 90,
+            "minimum": -90,
+            "type": "number"
+          },
+          "longitude": {
+            "description": "Longitude coordinate",
+            "example": -3.7038,
+            "format": "float",
+            "maximum": 180,
+            "minimum": -180,
+            "type": "number"
+          },
+          "precision": {
+            "description": "Precision of the location in meters",
+            "example": 10.0,
+            "format": "float",
+            "minimum": 0,
+            "type": "number"
+          },
+          "updated_at": {
+            "description": "When the location was last updated",
+            "example": "2023-06-15T14:30:00Z",
+            "format": "date_time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "latitude",
+          "longitude",
+          "precision",
+          "updated_at"
+        ],
+        "title": "PlayerLocation",
         "type": "object"
       }
     },

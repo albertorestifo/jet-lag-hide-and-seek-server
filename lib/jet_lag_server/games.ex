@@ -6,7 +6,7 @@ defmodule JetLagServer.Games do
   import Ecto.Query, warn: false
   alias JetLagServer.Repo
 
-  alias JetLagServer.Games.{Game, Player, GameSettings}
+  alias JetLagServer.Games.{Game, Player, GameSettings, PlayerLocation, GameConfig}
   alias JetLagServer.Geocoding
 
   @doc """
@@ -243,5 +243,71 @@ defmodule JetLagServer.Games do
       error ->
         error
     end
+  end
+
+  @doc """
+  Gets the location update frequency in seconds from the static configuration.
+  """
+  def get_location_update_frequency do
+    GameConfig.default_location_update_frequency()
+  end
+
+  @doc """
+  Updates a player's location.
+  """
+  def update_player_location(player_id, latitude, longitude, precision) do
+    now = DateTime.utc_now() |> DateTime.truncate(:second)
+
+    # Check if player exists
+    case get_player(player_id) do
+      nil ->
+        {:error, :player_not_found}
+
+      _player ->
+        # Check if player already has a location
+        case Repo.get_by(PlayerLocation, player_id: player_id) do
+          nil ->
+            # Create new location
+            %PlayerLocation{}
+            |> PlayerLocation.changeset(%{
+              player_id: player_id,
+              latitude: latitude,
+              longitude: longitude,
+              precision: precision,
+              updated_at: now
+            })
+            |> Repo.insert()
+
+          location ->
+            # Update existing location
+            location
+            |> PlayerLocation.changeset(%{
+              latitude: latitude,
+              longitude: longitude,
+              precision: precision,
+              updated_at: now
+            })
+            |> Repo.update()
+        end
+    end
+  end
+
+  @doc """
+  Gets a player with their location.
+  """
+  def get_player_with_location(player_id) do
+    Player
+    |> Repo.get(player_id)
+    |> Repo.preload(:location)
+  end
+
+  @doc """
+  Gets all players in a game with their locations.
+  """
+  def get_game_players_with_locations(game_id) do
+    Player
+    |> where([p], p.game_id == ^game_id)
+    |> Repo.all()
+    |> Repo.preload(:location)
   end
 end

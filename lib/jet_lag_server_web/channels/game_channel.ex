@@ -85,6 +85,22 @@ defmodule JetLagServerWeb.GameChannel do
     {:reply, {:ok, %Structs.PongEvent{}}, socket}
   end
 
+  def handle_in(
+        "update_location",
+        %{"latitude" => latitude, "longitude" => longitude, "precision" => precision},
+        socket
+      ) do
+    player_id = socket.assigns.player_id
+
+    case Games.update_player_location(player_id, latitude, longitude, precision) do
+      {:ok, _location} ->
+        {:reply, :ok, socket}
+
+      {:error, reason} ->
+        {:reply, {:error, %{reason: reason}}, socket}
+    end
+  end
+
   @doc """
   Handles the after_join message to send the game state to the client.
   This is especially useful for reconnections after app restart.

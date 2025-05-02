@@ -28,6 +28,7 @@ defmodule JetLagServerWeb.ApiSpec do
           Error: JetLagServerWeb.Schemas.Error,
           Location: JetLagServerWeb.Schemas.Location,
           GameSettings: JetLagServerWeb.Schemas.GameSettings,
+          PlayerLocation: JetLagServerWeb.Schemas.PlayerLocation,
           Player: JetLagServerWeb.Schemas.Player,
           Game: JetLagServerWeb.Schemas.Game,
           CreateGameRequest: JetLagServerWeb.Schemas.CreateGameRequest,

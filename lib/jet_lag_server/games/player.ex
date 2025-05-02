@@ -9,6 +9,7 @@ defmodule JetLagServer.Games.Player do
     field :is_creator, :boolean, default: false
 
     belongs_to :game, JetLagServer.Games.Game, type: :binary_id
+    has_one :location, JetLagServer.Games.PlayerLocation
 
     timestamps()
   end

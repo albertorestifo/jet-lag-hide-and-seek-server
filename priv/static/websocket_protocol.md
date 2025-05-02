@@ -197,6 +197,21 @@ Sent by the game creator to start the game.
 }
 ```
 
+### update_location
+
+Sent by clients to update their current location. Clients should send location updates every 5 seconds while the game is active.
+
+```json
+{
+  "type": "update_location",
+  "data": {
+    "latitude": 40.4168,
+    "longitude": -3.7038,
+    "precision": 10.0
+  }
+}
+```
+
 ### ping
 
 Sent by clients to keep the connection alive.

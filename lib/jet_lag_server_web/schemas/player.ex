@@ -4,6 +4,7 @@ defmodule JetLagServerWeb.Schemas.Player do
   """
   require OpenApiSpex
   alias OpenApiSpex.Schema
+  alias JetLagServerWeb.Schemas.PlayerLocation
 
   OpenApiSpex.schema(%{
     title: "Player",
@@ -22,6 +23,11 @@ defmodule JetLagServerWeb.Schemas.Player do
         description: "Whether this player created the game",
         default: false,
         example: true
+      },
+      location: %Schema{
+        nullable: true,
+        allOf: [PlayerLocation],
+        description: "Player's current location"
       }
     }
   })

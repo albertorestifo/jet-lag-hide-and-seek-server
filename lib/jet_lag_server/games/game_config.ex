@@ -9,6 +9,9 @@ defmodule JetLagServer.Games.GameConfig do
   # Define units enum values
   @units [:ansi, :iso]
 
+  # Default location update frequency in seconds
+  @default_location_update_frequency 5
+
   @doc """
   Returns the hiding zone size in meters based on game size and units.
   """
@@ -33,4 +36,9 @@ defmodule JetLagServer.Games.GameConfig do
   Returns the list of valid units.
   """
   def valid_units, do: @units
+
+  @doc """
+  Returns the default location update frequency in seconds.
+  """
+  def default_location_update_frequency, do: @default_location_update_frequency
 end
