@@ -90,6 +90,32 @@ defmodule JetLagServerWeb.API.GameControllerTest do
       assert json_response(conn, 400)["message"] ==
                "Invalid location ID format. Expected format: osm_type:osm_id"
     end
+
+    test "renders error when request format doesn't match the expected schema", %{
+      conn: conn,
+      cached: cached
+    } do
+      # Using camelCase instead of snake_case for location_id
+      invalid_attrs = %{
+        "locationId" => "#{cached.osm_type}:#{cached.osm_id}",
+        "settings" => %{
+          "units" => "iso",
+          "game_size" => "medium",
+          "hiding_zones" => ["bus_stops", "local_trains"],
+          "game_duration" => 1,
+          "day_start_time" => "09:00",
+          "day_end_time" => "18:00"
+        },
+        "creator" => %{
+          "name" => "John Doe"
+        }
+      }
+
+      conn = post(conn, ~p"/api/games", invalid_attrs)
+
+      assert json_response(conn, 400)["message"] ==
+               "Invalid request format. Please refer to the API documentation."
+    end
   end
 
   describe "show game" do

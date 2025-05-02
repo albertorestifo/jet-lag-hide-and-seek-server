@@ -22,6 +22,7 @@ defmodule JetLagServerWeb.API.GameController do
     ]
   )
 
+  # Handle the case when the request matches the expected format
   def create(conn, %{
         "location_id" => location_id,
         "settings" => settings_params,
@@ -68,6 +69,18 @@ defmodule JetLagServerWeb.API.GameController do
       error ->
         error
     end
+  end
+
+  # Handle the case when the request doesn't match the expected format
+  def create(conn, _params) do
+    conn
+    |> put_status(:bad_request)
+    |> put_view(JetLagServerWeb.ErrorJSON)
+    |> render(:error,
+      status: 400,
+      message: "Invalid request format. Please refer to the API documentation."
+    )
+    |> halt()
   end
 
   operation(:show,
