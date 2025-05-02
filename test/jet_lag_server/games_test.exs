@@ -105,6 +105,24 @@ defmodule JetLagServer.GamesTest do
       assert updated_game.status == :active
       assert updated_game.started_at != nil
     end
+
+    test "delete_game/2 deletes the game when called by the creator" do
+      game = game_fixture()
+      creator = Enum.find(game.players, fn p -> p.is_creator end)
+
+      assert {:ok, %Game{}} = Games.delete_game(game, creator.id)
+      assert nil == Games.get_game(game.id)
+    end
+
+    test "delete_game/2 returns error when called by non-creator" do
+      game = game_fixture()
+
+      # Add a non-creator player
+      {:ok, player} = Games.add_player_to_game(game.id, "Non-Creator")
+
+      assert {:error, :not_creator} = Games.delete_game(game, player.id)
+      assert Games.get_game(game.id) != nil
+    end
   end
 
   # We no longer need to test cached boundaries directly since we're using Geocoding module

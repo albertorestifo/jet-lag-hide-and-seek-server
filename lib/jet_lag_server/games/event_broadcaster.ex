@@ -10,6 +10,7 @@ defmodule JetLagServer.Games.EventBroadcaster do
     PlayerLeftEvent,
     GameStartedEvent,
     GameUpdatedEvent,
+    GameDeletedEvent,
     Player,
     Game
   }
@@ -54,6 +55,18 @@ defmodule JetLagServer.Games.EventBroadcaster do
   def broadcast_game_state(topic, game) do
     Endpoint.broadcast(topic, "game_state", %GameUpdatedEvent{
       game: game
+    })
+  end
+
+  @doc """
+  Broadcasts a game_deleted event to all clients connected to the game's channel.
+  This is used when a game is deleted to notify clients to disconnect.
+  """
+  @spec broadcast_game_deleted(String.t(), String.t()) :: :ok
+  def broadcast_game_deleted(game_id, reason \\ "Game deleted by creator") do
+    Endpoint.broadcast("games:#{game_id}", "game_deleted", %GameDeletedEvent{
+      game_id: game_id,
+      reason: reason
     })
   end
 end

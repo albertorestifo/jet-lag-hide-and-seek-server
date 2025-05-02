@@ -138,6 +138,45 @@ defmodule JetLagServerWeb.API.GameControllerTest do
       assert player["name"] == "John Doe"
       assert player["is_creator"] == true
     end
+  end
+
+  describe "delete game" do
+    setup [:create_game_with_token]
+
+    test "deletes game when creator is authenticated", %{conn: conn, game: game, token: token} do
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> delete(~p"/api/games/#{game.id}")
+
+      assert %{"data" => %{"message" => "Game deleted successfully"}} = json_response(conn, 200)
+      assert JetLagServer.Games.get_game(game.id) == nil
+    end
+
+    test "returns 404 when game doesn't exist", %{conn: conn, token: token} do
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> delete(~p"/api/games/nonexistent-id")
+
+      assert json_response(conn, 404)["errors"] != %{}
+    end
+
+    test "returns 403 when non-creator tries to delete game", %{conn: conn, game: game} do
+      # Create a non-creator player
+      {:ok, player} = JetLagServer.Games.add_player_to_game(game.id, "Non-Creator")
+
+      # Generate token for non-creator
+      non_creator_token = JetLagServer.Games.generate_token(game.id, player.id)
+
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{non_creator_token}")
+        |> delete(~p"/api/games/#{game.id}")
+
+      assert json_response(conn, 403)["errors"] != %{}
+      assert JetLagServer.Games.get_game(game.id) != nil
+    end
 
     test "renders 401 when no token is provided", %{conn: conn, game: game} do
       conn = get(conn, ~p"/api/games/#{game.id}")

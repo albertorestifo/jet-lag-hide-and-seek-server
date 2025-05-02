@@ -212,6 +212,37 @@ defmodule JetLagServerWeb.API.GameController do
     ]
   )
 
+  operation(:delete,
+    summary: "Delete a game",
+    description:
+      "Deletes a game and all associated data. Only the game creator can delete a game.",
+    parameters: [
+      id: [
+        in: :path,
+        description: "Game ID",
+        type: :string,
+        example: "game-123",
+        required: true
+      ]
+    ],
+    security: [%{"bearerAuth" => []}],
+    responses: [
+      ok:
+        {"Game deleted successfully", "application/json",
+         %Schema{
+           type: :object,
+           properties: %{
+             data: %Schema{type: :object, properties: %{message: %Schema{type: :string}}}
+           }
+         }},
+      not_found: {"Game not found", "application/json", Schemas.Error},
+      unauthorized: {"Unauthorized", "application/json", Schemas.Error},
+      forbidden:
+        {"Forbidden - only the creator can delete the game", "application/json", Schemas.Error},
+      internal_server_error: {"Server error", "application/json", Schemas.Error}
+    ]
+  )
+
   def check_game_exists(conn, %{"code" => code}) do
     game = Games.get_game_by_code(code)
 
@@ -223,5 +254,29 @@ defmodule JetLagServerWeb.API.GameController do
     conn
     |> put_status(:ok)
     |> json(response)
+  end
+
+  def delete(conn, %{"id" => id}) do
+    current_player = conn.assigns.current_player
+
+    with %Game{} = game <- Games.get_game(id),
+         {:ok, _deleted_game} <- Games.delete_game(game, current_player.id) do
+      conn
+      |> put_status(:ok)
+      |> json(%{data: %{message: "Game deleted successfully"}})
+    else
+      nil ->
+        {:error, :not_found}
+
+      {:error, :not_creator} ->
+        conn
+        |> put_status(:forbidden)
+        |> put_view(JetLagServerWeb.ErrorJSON)
+        |> render(:error, status: 403, message: "Only the game creator can delete the game")
+        |> halt()
+
+      error ->
+        error
+    end
   end
 end

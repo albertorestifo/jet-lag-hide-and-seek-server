@@ -146,6 +146,20 @@ Sent when game settings are updated.
 }
 ```
 
+### game_deleted
+
+Sent when a game is deleted by the creator. Clients should handle this event by disconnecting from the WebSocket and showing an appropriate message to the user.
+
+```json
+{
+  "type": "game_deleted",
+  "data": {
+    "game_id": "game-123",
+    "reason": "Game deleted by creator"
+  }
+}
+```
+
 ### error
 
 Sent when an error occurs.
@@ -241,7 +255,8 @@ Note: In the actual implementation, the server uses Elixir structs for all event
 3. Server also sends a `game_state` event with the full game state
 4. Server broadcasts events as they occur
 5. Client sends messages to perform actions
-6. Connection is closed when the game ends or the client disconnects
+6. Connection is closed when the game ends, the game is deleted, or the client disconnects
+7. If the game is deleted, the server sends a `game_deleted` event to all connected clients before closing the connection
 
 ## Reconnection
 
@@ -257,3 +272,20 @@ If the connection is lost, clients should attempt to reconnect with exponential 
 ## Error Handling
 
 If the server encounters an error processing a message, it will respond with an `error` message. Clients should handle these errors appropriately.
+
+## Game Deletion
+
+When a game is deleted by the creator:
+
+1. The server broadcasts a `game_deleted` event to all connected clients
+2. Clients should handle this event by:
+   - Displaying an appropriate message to the user (e.g., "The game has been deleted by the creator")
+   - Disconnecting from the WebSocket
+   - Navigating back to the app's home screen or game creation screen
+
+The game deletion can only be performed by the game creator through the REST API endpoint:
+
+```
+DELETE /api/games/{gameId}
+Authorization: Bearer {token}
+```

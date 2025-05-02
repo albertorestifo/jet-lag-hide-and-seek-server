@@ -269,4 +269,15 @@ defmodule JetLagServer.Games.Structs do
       :precision
     ]
   end
+
+  defmodule GameDeletedEvent do
+    @moduledoc """
+    Struct representing a game deleted event.
+    """
+    @derive {Jason.Encoder, except: []}
+    defstruct [
+      :game_id,
+      :reason
+    ]
+  end
 end

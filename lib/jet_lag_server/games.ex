@@ -144,10 +144,29 @@ defmodule JetLagServer.Games do
   end
 
   @doc """
-  Deletes a game.
+  Deletes a game and broadcasts a game_deleted event.
+  Only the game creator should be able to delete a game.
   """
-  def delete_game(%Game{} = game) do
-    Repo.delete(game)
+  def delete_game(%Game{} = game, player_id) do
+    # Check if the player is the creator
+    creator = Enum.find(game.players, fn p -> p.is_creator end)
+
+    if creator && creator.id == player_id do
+      # Delete the game
+      result = Repo.delete(game)
+
+      case result do
+        {:ok, deleted_game} ->
+          # Broadcast game deleted event
+          JetLagServer.Games.EventBroadcaster.broadcast_game_deleted(deleted_game.id)
+          {:ok, deleted_game}
+
+        error ->
+          error
+      end
+    else
+      {:error, :not_creator}
+    end
   end
 
   @doc """

@@ -125,6 +125,25 @@ defmodule JetLagServerWeb.GameChannelTest do
              subscribe_and_join(socket, "games:#{game.id}", %{})
   end
 
+  test "receives game_deleted event when game is deleted", %{
+    game: game,
+    creator: creator
+  } do
+    # Subscribe to the game channel
+    @endpoint.subscribe("games:#{game.id}")
+
+    # Delete the game
+    {:ok, _} = Games.delete_game(game, creator.id)
+
+    # Assert that a game_deleted event was broadcast
+    assert_broadcast "game_deleted", %JetLagServer.Games.Structs.GameDeletedEvent{
+      game_id: game_id,
+      reason: "Game deleted by creator"
+    }
+
+    assert game_id == game.id
+  end
+
   test "join fails with token for different game", %{game: game, creator: creator} do
     # Create another game
     other_game = game_fixture()

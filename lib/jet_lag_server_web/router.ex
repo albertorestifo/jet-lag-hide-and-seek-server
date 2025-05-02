@@ -60,6 +60,7 @@ defmodule JetLagServerWeb.Router do
 
     get "/games/:id", GameController, :show
     post "/games/:id/start", GameController, :start
+    delete "/games/:id", GameController, :delete
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
