@@ -146,17 +146,40 @@ defmodule JetLagServer.Games do
   @doc """
   Deletes a game and broadcasts a game_deleted event.
   Only the game creator should be able to delete a game.
+
+  This function will delete:
+  - The game itself
+  - All players associated with the game
+  - All player locations associated with those players
+  - The game settings
+
+  Players and player locations are deleted via database cascade delete constraints.
+  Game settings are explicitly deleted to ensure they're removed.
   """
   def delete_game(%Game{} = game, player_id) do
     # Check if the player is the creator
     creator = Enum.find(game.players, fn p -> p.is_creator end)
 
     if creator && creator.id == player_id do
-      # Delete the game
+      # Preload all associations to verify they're deleted
+      game = Repo.preload(game, [:settings, players: :location])
+
+      # Store settings_id for later deletion
+      settings_id = game.settings_id
+
+      # Delete the game - this will cascade delete players and player locations
       result = Repo.delete(game)
 
       case result do
         {:ok, deleted_game} ->
+          # Explicitly delete the game settings
+          if settings_id do
+            case Repo.get(JetLagServer.Games.GameSettings, settings_id) do
+              %JetLagServer.Games.GameSettings{} = settings -> Repo.delete(settings)
+              _ -> nil
+            end
+          end
+
           # Broadcast game deleted event
           JetLagServer.Games.EventBroadcaster.broadcast_game_deleted(deleted_game.id)
           {:ok, deleted_game}

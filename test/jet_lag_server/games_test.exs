@@ -106,12 +106,39 @@ defmodule JetLagServer.GamesTest do
       assert updated_game.started_at != nil
     end
 
-    test "delete_game/2 deletes the game when called by the creator" do
+    test "delete_game/2 deletes the game and all associated data when called by the creator" do
       game = game_fixture()
       creator = Enum.find(game.players, fn p -> p.is_creator end)
 
+      # Add a non-creator player with location
+      {:ok, player} = Games.add_player_to_game(game.id, "Non-Creator")
+
+      # Add location for the player
+      {:ok, _location} = Games.update_player_location(player.id, 40.4168, -3.7038, 10.0)
+
+      # Get the settings ID to check later
+      settings_id = game.settings_id
+
+      # Delete the game
       assert {:ok, %Game{}} = Games.delete_game(game, creator.id)
+
+      # Verify game is deleted
       assert nil == Games.get_game(game.id)
+
+      # Verify players are deleted
+      assert nil == Games.get_player(creator.id)
+      assert nil == Games.get_player(player.id)
+
+      # Verify player locations are deleted
+      import Ecto.Query
+
+      assert [] ==
+               JetLagServer.Repo.all(
+                 from pl in JetLagServer.Games.PlayerLocation, where: pl.player_id == ^player.id
+               )
+
+      # Verify game settings are deleted
+      assert nil == JetLagServer.Repo.get(JetLagServer.Games.GameSettings, settings_id)
     end
 
     test "delete_game/2 returns error when called by non-creator" do

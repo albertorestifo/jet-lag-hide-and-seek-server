@@ -277,11 +277,17 @@ If the server encounters an error processing a message, it will respond with an 
 
 When a game is deleted by the creator:
 
-1. The server broadcasts a `game_deleted` event to all connected clients
-2. Clients should handle this event by:
+1. The server deletes all game data, including:
+   - The game itself
+   - All players associated with the game
+   - All player locations and tracking data
+   - All game settings
+2. The server broadcasts a `game_deleted` event to all connected clients
+3. Clients should handle this event by:
    - Displaying an appropriate message to the user (e.g., "The game has been deleted by the creator")
    - Disconnecting from the WebSocket
    - Navigating back to the app's home screen or game creation screen
+   - Removing any locally stored game data
 
 The game deletion can only be performed by the game creator through the REST API endpoint:
 
@@ -289,3 +295,5 @@ The game deletion can only be performed by the game creator through the REST API
 DELETE /api/games/{gameId}
 Authorization: Bearer {token}
 ```
+
+**Important**: Game deletion is permanent and cannot be undone. All player data associated with the game will be permanently deleted from the server.
