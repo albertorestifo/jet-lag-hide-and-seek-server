@@ -33,12 +33,18 @@ defmodule JetLagServerWeb.API.GameControllerTest do
 
       conn = post(conn, ~p"/api/games", valid_attrs)
 
-      assert %{"game_id" => game_id, "game_code" => game_code, "websocket_url" => websocket_url} =
-               json_response(conn, 201)
+      assert %{
+               "game_id" => game_id,
+               "game_code" => game_code,
+               "websocket_url" => websocket_url,
+               "token" => token
+             } = json_response(conn, 201)
 
       assert game_id =~ ~r/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
       assert game_code =~ ~r/^[A-Z0-9]{6}$/
       assert websocket_url =~ ~r/^wss:\/\/localhost\/ws\/games\/#{game_id}\?token=/
+      assert token != nil
+      assert is_binary(token)
     end
 
     test "renders error when location does not exist", %{conn: conn} do

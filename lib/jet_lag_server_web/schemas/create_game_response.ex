@@ -9,7 +9,7 @@ defmodule JetLagServerWeb.Schemas.CreateGameResponse do
     title: "CreateGameResponse",
     description: "Response after creating a game",
     type: :object,
-    required: [:game_id, :game_code, :websocket_url],
+    required: [:game_id, :game_code, :websocket_url, :token],
     properties: %{
       game_id: %Schema{
         type: :string,
@@ -25,6 +25,11 @@ defmodule JetLagServerWeb.Schemas.CreateGameResponse do
         type: :string,
         description: "WebSocket URL for real-time updates",
         example: "wss://api.jetlag.example.com/ws/games/game-123"
+      },
+      token: %Schema{
+        type: :string,
+        description: "Authentication token for the game creator",
+        example: "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9..."
       }
     }
   })

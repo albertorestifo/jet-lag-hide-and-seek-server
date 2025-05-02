@@ -74,6 +74,11 @@
             "example": "game-123",
             "type": "string"
           },
+          "token": {
+            "description": "Authentication token for the game creator",
+            "example": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9...",
+            "type": "string"
+          },
           "websocket_url": {
             "description": "WebSocket URL for real-time updates",
             "example": "wss://api.jetlag.example.com/ws/games/game-123",
@@ -83,7 +88,8 @@
         "required": [
           "game_id",
           "game_code",
-          "websocket_url"
+          "websocket_url",
+          "token"
         ],
         "title": "CreateGameResponse",
         "type": "object"

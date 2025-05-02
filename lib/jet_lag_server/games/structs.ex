@@ -139,7 +139,8 @@ defmodule JetLagServer.Games.Structs do
     defstruct [
       :game_id,
       :game_code,
-      :websocket_url
+      :websocket_url,
+      :token
     ]
   end
 

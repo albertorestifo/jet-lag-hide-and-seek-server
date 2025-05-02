@@ -23,7 +23,9 @@ defmodule JetLagServerWeb.API.GameJSON do
     %Structs.CreateGameResponse{
       game_id: game.id,
       game_code: game.code,
-      websocket_url: "wss://#{JetLagServerWeb.Endpoint.host()}/ws/games/#{game.id}?token=#{token}"
+      websocket_url:
+        "wss://#{JetLagServerWeb.Endpoint.host()}/ws/games/#{game.id}?token=#{token}",
+      token: token
     }
   end
 
