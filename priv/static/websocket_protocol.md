@@ -22,7 +22,10 @@ When connecting to the WebSocket, clients should include a token in the query pa
 wss://api.jetlag.example.com/ws/games/{gameId}?token={token}
 ```
 
-The token is provided in the response when creating or joining a game.
+The token is provided in the response when creating or joining a game. Specifically:
+
+1. When creating a game, the response includes a `token` field that can be used by the game creator.
+2. When joining a game, the response includes a `token` field that can be used by the player who joined.
 
 ## Message Format
 
@@ -105,8 +108,8 @@ Sent when a client connects or reconnects to the WebSocket. Contains the full ga
       },
       "settings": {
         "units": "iso",
+        "game_size": "medium",
         "hiding_zones": ["bus_stops", "local_trains"],
-        "hiding_zone_size": 500,
         "game_duration": 1,
         "day_start_time": "09:00",
         "day_end_time": "18:00"
@@ -234,10 +237,8 @@ If the client application restarts or loses connection, it should reconnect to t
 
 This allows the client to restore its state and continue participating in the game without disruption.
 
+If the connection is lost, clients should attempt to reconnect with exponential backoff (e.g., starting with a short delay and gradually increasing it if reconnection attempts fail). The server will send the current game state upon successful reconnection.
+
 ## Error Handling
 
 If the server encounters an error processing a message, it will respond with an `error` message. Clients should handle these errors appropriately.
-
-## Reconnection
-
-If the connection is lost, clients should attempt to reconnect with exponential backoff. The server will send the current game state upon reconnection.
