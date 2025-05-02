@@ -31,9 +31,9 @@ defmodule JetLagServer.GamesTest do
       valid_attrs = %{
         location_id: "#{cached.osm_type}:#{cached.osm_id}",
         settings: %{
-          units: "iso",
+          units: :iso,
+          game_size: :medium,
           hiding_zones: ["bus_stops", "local_trains"],
-          hiding_zone_size: 500,
           game_duration: 1,
           day_start_time: "09:00",
           day_end_time: "18:00"
@@ -49,7 +49,8 @@ defmodule JetLagServer.GamesTest do
       assert game.started_at == nil
       assert game.osm_type == cached.osm_type
       assert game.osm_id == cached.osm_id
-      assert game.settings.units == "iso"
+      assert game.settings.units == :iso
+      assert game.settings.game_size == :medium
       assert [player] = game.players
       assert player.name == "John Doe"
       assert player.is_creator == true
@@ -60,9 +61,9 @@ defmodule JetLagServer.GamesTest do
         # Non-existent location
         location_id: "way:999999",
         settings: %{
-          units: "iso",
+          units: :iso,
+          game_size: :medium,
           hiding_zones: ["bus_stops", "local_trains"],
-          hiding_zone_size: 500,
           game_duration: 1,
           day_start_time: "09:00",
           day_end_time: "18:00"
@@ -80,9 +81,9 @@ defmodule JetLagServer.GamesTest do
         # Invalid format
         location_id: "invalid-format",
         settings: %{
-          units: "iso",
+          units: :iso,
+          game_size: :medium,
           hiding_zones: ["bus_stops", "local_trains"],
-          hiding_zone_size: 500,
           game_duration: 1,
           day_start_time: "09:00",
           day_end_time: "18:00"
@@ -111,18 +112,18 @@ defmodule JetLagServer.GamesTest do
   describe "game_settings" do
     test "create_game_settings/1 with valid data creates game settings" do
       valid_attrs = %{
-        units: "iso",
+        units: :iso,
+        game_size: :medium,
         hiding_zones: ["bus_stops", "local_trains"],
-        hiding_zone_size: 500,
         game_duration: 1,
         day_start_time: "09:00",
         day_end_time: "18:00"
       }
 
       assert {:ok, %GameSettings{} = settings} = Games.create_game_settings(valid_attrs)
-      assert settings.units == "iso"
+      assert settings.units == :iso
+      assert settings.game_size == :medium
       assert settings.hiding_zones == ["bus_stops", "local_trains"]
-      assert settings.hiding_zone_size == 500
       assert settings.game_duration == 1
       assert settings.day_start_time == "09:00"
       assert settings.day_end_time == "18:00"

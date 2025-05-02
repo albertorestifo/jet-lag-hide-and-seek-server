@@ -168,7 +168,7 @@
             "type": "string"
           },
           "status": {
-            "description": "Current status of the game",
+            "description": "Current status of the game (waiting, active, completed)",
             "enum": [
               "waiting",
               "active",
@@ -210,12 +210,15 @@
             "minimum": 1,
             "type": "integer"
           },
-          "hiding_zone_size": {
-            "description": "Size of hiding zones in meters",
-            "example": 500,
-            "maximum": 2000,
-            "minimum": 100,
-            "type": "integer"
+          "game_size": {
+            "description": "Size of the game (S|M|L)",
+            "enum": [
+              "small",
+              "medium",
+              "large"
+            ],
+            "example": "medium",
+            "type": "string"
           },
           "hiding_zones": {
             "description": "Types of locations where players can hide",
@@ -248,8 +251,8 @@
         },
         "required": [
           "units",
+          "game_size",
           "hiding_zones",
-          "hiding_zone_size",
           "game_duration",
           "day_start_time",
           "day_end_time"

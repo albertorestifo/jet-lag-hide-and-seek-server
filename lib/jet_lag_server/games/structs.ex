@@ -25,8 +25,8 @@ defmodule JetLagServer.Games.Structs do
     @derive {Jason.Encoder, except: []}
     defstruct [
       :units,
+      :game_size,
       :hiding_zones,
-      :hiding_zone_size,
       :game_duration,
       :day_start_time,
       :day_end_time
@@ -38,8 +38,8 @@ defmodule JetLagServer.Games.Structs do
     def from_schema(%JetLagServer.Games.GameSettings{} = settings) do
       %__MODULE__{
         units: settings.units,
+        game_size: settings.game_size,
         hiding_zones: settings.hiding_zones,
-        hiding_zone_size: settings.hiding_zone_size,
         game_duration: settings.game_duration,
         day_start_time: settings.day_start_time,
         day_end_time: settings.day_end_time

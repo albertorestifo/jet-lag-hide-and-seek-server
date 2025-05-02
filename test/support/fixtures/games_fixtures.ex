@@ -53,9 +53,9 @@ defmodule JetLagServer.GamesFixtures do
     {:ok, settings} =
       attrs
       |> Enum.into(%{
-        units: "iso",
+        units: :iso,
+        game_size: :medium,
         hiding_zones: ["bus_stops", "local_trains"],
-        hiding_zone_size: 500,
         game_duration: 1,
         day_start_time: "09:00",
         day_end_time: "18:00"
@@ -78,9 +78,9 @@ defmodule JetLagServer.GamesFixtures do
         location_id: Map.get(attrs, :location_id, "#{cached.osm_type}:#{cached.osm_id}"),
         settings:
           Map.get(attrs, :settings, %{
-            units: "iso",
+            units: :iso,
+            game_size: :medium,
             hiding_zones: ["bus_stops", "local_trains"],
-            hiding_zone_size: 500,
             game_duration: 1,
             day_start_time: "09:00",
             day_end_time: "18:00"

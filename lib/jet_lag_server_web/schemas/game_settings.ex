@@ -11,8 +11,8 @@ defmodule JetLagServerWeb.Schemas.GameSettings do
     type: :object,
     required: [
       :units,
+      :game_size,
       :hiding_zones,
-      :hiding_zone_size,
       :game_duration,
       :day_start_time,
       :day_end_time
@@ -23,6 +23,12 @@ defmodule JetLagServerWeb.Schemas.GameSettings do
         enum: ["ansi", "iso"],
         description: "Unit system to use",
         example: "iso"
+      },
+      game_size: %Schema{
+        type: :string,
+        enum: ["small", "medium", "large"],
+        description: "Size of the game (S|M|L)",
+        example: "medium"
       },
       hiding_zones: %Schema{
         type: :array,
@@ -39,13 +45,6 @@ defmodule JetLagServerWeb.Schemas.GameSettings do
           ]
         },
         example: ["bus_stops", "local_trains"]
-      },
-      hiding_zone_size: %Schema{
-        type: :integer,
-        description: "Size of hiding zones in meters",
-        minimum: 100,
-        maximum: 2000,
-        example: 500
       },
       game_duration: %Schema{
         type: :integer,
