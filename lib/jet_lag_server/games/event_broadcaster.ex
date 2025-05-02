@@ -16,15 +16,18 @@ defmodule JetLagServer.Games.EventBroadcaster do
   }
 
   alias JetLagServerWeb.Endpoint
+  alias JetLagServerWeb.WebSocketLogger
 
   @doc """
   Broadcasts a player_joined event to all clients connected to the game's channel.
   """
   @spec broadcast_player_joined(String.t(), %Player{}) :: :ok
   def broadcast_player_joined(game_id, player) do
-    Endpoint.broadcast("games:#{game_id}", "player_joined", %PlayerJoinedEvent{
-      player: player
-    })
+    topic = "games:#{game_id}"
+    payload = %PlayerJoinedEvent{player: player}
+
+    WebSocketLogger.log_broadcast_message(topic, "player_joined", payload)
+    Endpoint.broadcast(topic, "player_joined", payload)
   end
 
   @doc """
@@ -32,9 +35,11 @@ defmodule JetLagServer.Games.EventBroadcaster do
   """
   @spec broadcast_player_left(String.t(), String.t()) :: :ok
   def broadcast_player_left(game_id, player_id) do
-    Endpoint.broadcast("games:#{game_id}", "player_left", %PlayerLeftEvent{
-      player_id: player_id
-    })
+    topic = "games:#{game_id}"
+    payload = %PlayerLeftEvent{player_id: player_id}
+
+    WebSocketLogger.log_broadcast_message(topic, "player_left", payload)
+    Endpoint.broadcast(topic, "player_left", payload)
   end
 
   @doc """
@@ -42,9 +47,11 @@ defmodule JetLagServer.Games.EventBroadcaster do
   """
   @spec broadcast_game_started(String.t(), DateTime.t() | NaiveDateTime.t()) :: :ok
   def broadcast_game_started(game_id, started_at) do
-    Endpoint.broadcast("games:#{game_id}", "game_started", %GameStartedEvent{
-      started_at: started_at
-    })
+    topic = "games:#{game_id}"
+    payload = %GameStartedEvent{started_at: started_at}
+
+    WebSocketLogger.log_broadcast_message(topic, "game_started", payload)
+    Endpoint.broadcast(topic, "game_started", payload)
   end
 
   @doc """
@@ -53,9 +60,10 @@ defmodule JetLagServer.Games.EventBroadcaster do
   """
   @spec broadcast_game_state(String.t(), Game.t()) :: :ok
   def broadcast_game_state(topic, game) do
-    Endpoint.broadcast(topic, "game_state", %GameUpdatedEvent{
-      game: game
-    })
+    payload = %GameUpdatedEvent{game: game}
+
+    WebSocketLogger.log_broadcast_message(topic, "game_state", payload)
+    Endpoint.broadcast(topic, "game_state", payload)
   end
 
   @doc """
@@ -64,9 +72,10 @@ defmodule JetLagServer.Games.EventBroadcaster do
   """
   @spec broadcast_game_deleted(String.t(), String.t()) :: :ok
   def broadcast_game_deleted(game_id, reason \\ "Game deleted by creator") do
-    Endpoint.broadcast("games:#{game_id}", "game_deleted", %GameDeletedEvent{
-      game_id: game_id,
-      reason: reason
-    })
+    topic = "games:#{game_id}"
+    payload = %GameDeletedEvent{game_id: game_id, reason: reason}
+
+    WebSocketLogger.log_broadcast_message(topic, "game_deleted", payload)
+    Endpoint.broadcast(topic, "game_deleted", payload)
   end
 end

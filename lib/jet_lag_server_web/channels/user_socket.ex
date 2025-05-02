@@ -1,5 +1,6 @@
 defmodule JetLagServerWeb.UserSocket do
   use Phoenix.Socket
+  alias JetLagServerWeb.WebSocketLogger
 
   # A Socket handler
   #
@@ -21,8 +22,12 @@ defmodule JetLagServerWeb.UserSocket do
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
   @impl true
-  def connect(_params, socket, _connect_info) do
+  def connect(params, socket, connect_info) do
+    # Log the connection attempt
+    WebSocketLogger.log_connect(params, connect_info)
+
     # We don't authenticate on connect, but rather on channel join
+    WebSocketLogger.log_connect_success(socket)
     {:ok, socket}
   end
 
